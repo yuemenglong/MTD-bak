@@ -1,5 +1,5 @@
 {
-  "name": "front-end",
+  "name": "MTD",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,10 +9,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-plugin-transform-react-jsx": "^6.8.0",
     "express": "^4.13.4",
+    "jade-jsx": "^1.0.3",
     "lodash": "^4.11.2",
     "pug": "^0.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.7",
+    "through2": "^2.0.1"
+  }
 }
