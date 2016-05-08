@@ -1,4 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var svg = require("./svg");
+var Bar = require("./bar");
+
+},{"./bar":2,"./svg":3}],2:[function(require,module,exports){
 var _ = require("lodash");
 
 var originBars = [];
@@ -85,8 +89,7 @@ if (require.main == module) {
     console.log(originBars[0].getRectCoord());
 }
 
-},{"lodash":undefined}],2:[function(require,module,exports){
-var Bar = require('./bar');
+},{"lodash":undefined}],3:[function(require,module,exports){
 var Svg = React.createClass({
     getInitialState: function () {
         return {
@@ -147,8 +150,8 @@ var Svg = React.createClass({
         );
     }
 });
+module.exports = Svg;
 var svg = ReactDOM.render(React.createElement(Svg, { width: '100', height: '100' }), document.body);
 svg.drawLine(20, 20, 80, 30);
 svg.drawRect(20, 20, 90, 90);
-var bar = new Bar(10, 10, 20, 20);
-},{"./bar":1}]},{},[2]);
+},{}]},{},[1]);

@@ -1,5 +1,3 @@
-var Bar = require("./bar");
-
 var Svg = React.createClass({
     getInitialState: function() {
         return { lines: [], rects: [] };
@@ -43,6 +41,8 @@ var Svg = React.createClass({
     }
 });
 
+module.exports = Svg;
+
 var svg = ReactDOM.render(
     html("Svg(width='100', height='100')"),
     document.body
@@ -50,4 +50,3 @@ var svg = ReactDOM.render(
 
 svg.drawLine(20, 20, 80, 30);
 svg.drawRect(20, 20, 90, 90);
-var bar = new Bar(10, 10, 20, 20);
