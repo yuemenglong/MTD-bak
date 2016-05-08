@@ -1,0 +1,19 @@
+.test {
+    width: 50%;
+    height: 200px;
+    background: #888;
+}
+
+.inner {
+    width: 10%;
+    height: 100%;
+    fill: #fff;
+    stroke-width: 1;
+    stroke: #000;
+    /*fill: #00f;*/
+    /*width="50%" height="100%" style="fill:rgb(0,0,255);stroke-width:1;*/
+    /*stroke:rgb(0,0,0)"*/
+    /*display: inline-block;*/
+    /*width: 7%;*/
+    /*height: 100%;*/
+}
