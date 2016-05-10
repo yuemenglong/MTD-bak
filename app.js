@@ -4,7 +4,7 @@ var fs = require("fs");
 
 var app = express();
 
-app.use('/static', express.static(__dirname + '/public'));
+app.use('/bundle', express.static(__dirname + '/bundle'));
 
 app.get("/", function(req, res) {
     var tpl = fs.readFileSync(__dirname + "/jade/index.jade");

@@ -48,5 +48,8 @@ var svg = ReactDOM.render(
     document.body
 );
 
-svg.drawLine(20, 20, 80, 30);
-svg.drawRect(20, 20, 90, 90);
+var i = 0;
+setInterval(function() {
+    svg.drawLine(0, 0, 100, i * 5);
+    i++;
+}, 1000);

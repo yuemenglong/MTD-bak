@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.13.4",
-    "jade-jsx": "^1.0.3",
     "lodash": "^4.11.2",
     "pug": "^0.1.0"
   },
@@ -20,6 +19,8 @@
     "browserify": "^13.0.1",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-jade-jsx": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.7",
     "through2": "^2.0.1",
