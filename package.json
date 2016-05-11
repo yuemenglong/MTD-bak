@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.3.5",
     "express": "^4.13.4",
     "lodash": "^4.11.2",
     "pug": "^0.1.0"
@@ -19,9 +20,12 @@
     "browserify": "^13.0.1",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-add-src": "^0.2.0",
     "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.0",
     "gulp-jade-jsx": "^1.0.1",
     "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
     "gulp-util": "^3.0.7",
     "through2": "^2.0.1",
     "vinyl-buffer": "^1.0.0",

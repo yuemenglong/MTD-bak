@@ -15,7 +15,7 @@ gulp.task('default', ["build", "pack", "clean"]);
 
 //trans jsx => js
 gulp.task('build', function() {
-    return gulp.src("src/*.jsx")
+    gulp.src("src/*.jsx")
         .pipe(jadeToJsx())
         .pipe(babel({ presets: ['react'] }))
         .pipe(rename({ extname: ".js" }))
@@ -39,5 +39,5 @@ gulp.task('clean', ["build", "pack"], function() {
     // gulp.src("src/*.jsx")
     //     .pipe(rename({ extname: ".js" }))
     //     .pipe(path(del));
-    return gulp.src("build").pipe(path(del));
+    gulp.src("build").pipe(path(del));
 });

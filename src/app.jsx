@@ -1,15 +1,46 @@
+var test = require("./test");
+test();
+
 // var Svg = require("./svg");
-var Bar = require("./bar");
-var data = require("./2001.json");
+// var Bar = require("./bar");
+// var data = require("./2001.json");
 
-Bar.push(data);
-
-console.log(Bar.originBars());
+// var WINDOW_WIDTH = 100;
+// var WINDOW_HEIGHT = 100;
 
 // var svg = ReactDOM.render(
-//     html("Svg(width='100', height='100')"),
+//     html("Svg(width={WINDOW_WIDTH}, height={WINDOW_HEIGHT})"),
 //     document.body
 // );
+
+// function init() {
+//     Bar.push(data);
+//     Bar.updateBars();
+//     var w = Bar.window();
+//     w.x1 = 0;
+//     w.x2 = WINDOW_WIDTH;
+//     w.height = WINDOW_HEIGHT;
+//     Bar.updateWindow(w);
+//     drawBars(Bar.displayBars());
+// }
+
+// function drawBars(bars) {
+//     bars.map(drawBar);
+// }
+
+// function drawBar(bar) {
+//     var rect = bar.getRectCoord();
+//     svg.drawRect(rect);
+// }
+
+// init();
+// console.log("hello");
+
+// console.log(Bar.originBars());
+// console.log(Bar.displayBars());
+// console.log(Bar.window());
+
+
 
 // var i = 0;
 // setInterval(function() {

@@ -8,24 +8,55 @@ var BAR_GAP = 5;
 var Window = {
     x1: 0,
     x2: 100,
-    y1: 0.5,
-    y2: 2,
+    y1: 0,
+    y2: 0,
     width: 100,
     height: 100,
 }
 
 var displayBars = [];
 
-function Bar(open, high, low, close, time) {
+function Bar(open, high, low, close, datetime) {
     this.open = open;
     this.high = high;
     this.low = low;
     this.close = close;
-    this.time = time;
+    this.datetime = datetime;
+}
+
+Bar.window = function() {
+    return _.clone(Window);
+}
+
+Bar.updateWindow = function(w) {
+    if (w) {
+        Window.x1 = w.x1;
+        Window.x2 = w.x2;
+        Window.width = Math.abs(w.x2 - w.x1);
+        Window.height = w.height;
+    }
+    // update displayBars
+    var start = _.sortedIndexBy(originBars, { x2: Window.x1 }, "x2");
+    var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
+    displayBars = originBars.slice(start, end);
+
+    var high = _.maxBy(displayBars, function(item) {
+        return item.high;
+    });
+    var low = _.minBy(displayBars, function(item) {
+        return item.low;
+    })
+    Window.y1 = low.low;
+    Window.y2 = high.high;
+
 }
 
 Bar.originBars = function() {
     return originBars;
+}
+
+Bar.displayBars = function() {
+    return displayBars;
 }
 
 Bar.push = function(bar) {
@@ -37,20 +68,24 @@ Bar.push = function(bar) {
         originBars.push(bar);
     } else {
         originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
-            new Date(bar.time)));
+            new Date(bar.datetime)));
     }
 }
 
 Bar.unshift = function(bar) {
+    if (Array.isArray(bar)) {
+        bar.map(Bar.unshift);
+        return;
+    }
     if (bar instanceof Bar) {
         originBars.unshift(bar);
     } else {
         originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
-            new Date(bar.time)));
+            new Date(bar.datetime)));
     }
 }
 
-Bar.update = function() {
+Bar.updateBars = function() {
     if (!originBars.length) {
         return;
     }
@@ -62,17 +97,6 @@ Bar.update = function() {
         originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
     }
 
-    // update window X
-    var start = _.sortedIndexBy(originBars, { x2: Window.x1 }, "x2");
-    var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
-    displayBars = originBars.slice(start, end);
-    // update window Y
-    var high = _.maxBy(displayBars, function(item) {
-        return item.high;
-    });
-    var low = _.minBy(displayBars, function(item) {
-        return item.low;
-    })
 }
 
 Bar.prototype.getRectCoord = function() {
