@@ -19,6 +19,10 @@ function Bar(open, high, low, close, datetime) {
     this.low = low;
     this.close = close;
     this.datetime = datetime;
+    this.x1 = null;
+    this.y1 = null;
+    this.x2 = null;
+    this.y2 = null;
 }
 
 Bar.WIDTH = 10;
@@ -121,6 +125,31 @@ Bar.prototype.getRectCoord = function() {
     var y1 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
     var y2 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
     return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+
+Bar.prototype.getUpperLineCoord = function() {
+    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
+    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
+    var y1 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.high) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+Bar.prototype.getUnderLineCoord = function() {
+    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
+    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
+    var y1 = (Window.y2 - this.low) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+Bar.prototype.color = function() {
+    if (this.open >= this.close) {
+        return "#FFF";
+    } else {
+        return "#000";
+    }
 }
 
 module.exports = Bar;

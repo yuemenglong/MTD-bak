@@ -36,7 +36,11 @@ function refresh() {
     svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     Bar.displayBars().map(function(item) {
         var rect = item.getRectCoord();
-        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2);
+        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2, "#888", item.color());
+        var line = item.getUpperLineCoord();
+        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
+        var line = item.getUnderLineCoord();
+        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
     });
 }
 

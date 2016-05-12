@@ -242,7 +242,11 @@ function refresh() {
     svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     Bar.displayBars().map(function (item) {
         var rect = item.getRectCoord();
-        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2);
+        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2, '#888', item.color());
+        var line = item.getUpperLineCoord();
+        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
+        var line = item.getUnderLineCoord();
+        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
     });
 }
 function next() {
@@ -287,6 +291,10 @@ function Bar(open, high, low, close, datetime) {
     this.low = low;
     this.close = close;
     this.datetime = datetime;
+    this.x1 = null;
+    this.y1 = null;
+    this.x2 = null;
+    this.y2 = null;
 }
 
 Bar.WIDTH = 10;
@@ -391,6 +399,31 @@ Bar.prototype.getRectCoord = function() {
     return { x1: x1, y1: y1, x2: x2, y2: y2 };
 }
 
+
+Bar.prototype.getUpperLineCoord = function() {
+    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
+    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
+    var y1 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.high) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+Bar.prototype.getUnderLineCoord = function() {
+    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
+    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
+    var y1 = (Window.y2 - this.low) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+Bar.prototype.color = function() {
+    if (this.open >= this.close) {
+        return "#FFF";
+    } else {
+        return "#000";
+    }
+}
+
 module.exports = Bar;
 
 if (require.main == module) {
@@ -422,7 +455,7 @@ var Svg = React.createClass({
         };
     },
     drawLine: function (x1, y1, x2, y2, clr) {
-        clr = clr || '#888';
+        clr = clr || '#000';
         var copy = this.state.lines.slice();
         var key = `${ x1 }${ y1 }${ x2 }${ y2 }`;
         var style = { stroke: clr };
@@ -436,9 +469,9 @@ var Svg = React.createClass({
         });
         this.setState({ lines: copy });
     },
-    drawRect: function (x1, y1, x2, y2, clr, fill) {
-        clr = clr || '#888';
-        fill = fill || false;
+    drawRect: function (x1, y1, x2, y2, clr, fillClr) {
+        clr = clr || '#000';
+        fillClr = fillClr || null;
         var copy = this.state.rects.slice();
         var key = `${ x1 }${ y1 }${ x2 }${ y2 }`;
         var x = Math.min(x1, x2);
@@ -446,8 +479,8 @@ var Svg = React.createClass({
         var width = Math.max(x1, x2) - x;
         var height = Math.max(y1, y2) - y;
         var style = { stroke: clr };
-        if (fill) {
-            style.fill = clr;
+        if (fillClr) {
+            style.fill = fillClr;
         } else {
             style.fillOpacity = 0;
         }
