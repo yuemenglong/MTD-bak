@@ -2,9 +2,6 @@ var _ = require("lodash");
 
 var originBars = [];
 
-var BAR_WIDTH = 10;
-var BAR_GAP = 5;
-
 var Window = {
     x1: 0,
     x2: 100,
@@ -24,31 +21,50 @@ function Bar(open, high, low, close, datetime) {
     this.datetime = datetime;
 }
 
+Bar.WIDTH = 10;
+Bar.GAP = 5;
+
+Bar.max = function() {
+    return _(originBars).nth(-1).x2;
+}
+
 Bar.window = function() {
     return _.clone(Window);
 }
 
-Bar.updateWindow = function(w) {
-    if (w) {
-        Window.x1 = w.x1;
-        Window.x2 = w.x2;
-        Window.width = Math.abs(w.x2 - w.x1);
-        Window.height = w.height;
+Bar.setWindowSize = function(width, height) {
+    Window.width = width;
+    Window.height = height;
+}
+
+Bar.setWindowPos = function(x) {
+    if (x >= 0) {
+        Window.x1 = x;
+        Window.x2 = Window.x1 + Window.width;
+    } else {
+        var max = _(originBars).nth(-1).x2;
+        Window.x1 = max + x;
+        Window.x2 = Window.x1 + Window.width;
     }
-    // update displayBars
+}
+
+Bar.normalizeWindow = function() {
+    var n = _(originBars).sortedIndexBy({ x2: Window.x1 }, "x2");
+    var first = _(originBars).nth(n);
+    Window.x1 = first.x1 - Bar.GAP / 2;
+    Window.x2 = Window.x1 + Window.width;
+}
+
+Bar.updateWindow = function() {
     var start = _.sortedIndexBy(originBars, { x2: Window.x1 }, "x2");
     var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
     displayBars = originBars.slice(start, end);
 
-    var high = _.maxBy(displayBars, function(item) {
-        return item.high;
-    });
-    var low = _.minBy(displayBars, function(item) {
-        return item.low;
-    })
+    var high = _(displayBars).maxBy(item => item.high);
+    var low = _(displayBars).minBy(item => item.low);
+
     Window.y1 = low.low;
     Window.y2 = high.high;
-
 }
 
 Bar.originBars = function() {
@@ -89,10 +105,10 @@ Bar.updateBars = function() {
     if (!originBars.length) {
         return;
     }
-    originBars[0].x1 = 0.5 * BAR_GAP;
+    originBars[0].x1 = 0.5 * Bar.GAP;
     for (var i in originBars) {
-        (i > 0) && (originBars[i].x1 = originBars[i - 1].x2 + BAR_GAP);
-        originBars[i].x2 = originBars[i].x1 + BAR_WIDTH;
+        (i > 0) && (originBars[i].x1 = originBars[i - 1].x2 + Bar.GAP);
+        originBars[i].x2 = originBars[i].x1 + Bar.WIDTH;
         originBars[i].y1 = Math.min(originBars[i].open, originBars[i].close);
         originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
     }
@@ -110,11 +126,19 @@ Bar.prototype.getRectCoord = function() {
 module.exports = Bar;
 
 if (require.main == module) {
-    for (var i = 0; i < 100; i++) {
-        var bar = new Bar(1.0, 1.5, 0.8, 1.2, new Date());
-        Bar.push(bar);
+    var data = require("./2001.json");
+    var WINDOW_WIDTH = 100;
+    var WINDOW_HEIGHT = 100;
+    init();
+
+    function init() {
+        Bar.push(data);
+        Bar.updateBars();
+        Bar.setWindowSize(100, 100);
+        Bar.setWindowPos(-100);
+        Bar.normalizeWindow();
+        Bar.updateWindow();
+        console.log(Bar.window());
     }
-    Bar.update();
-    console.log(originBars);
-    console.log(originBars[0].getRectCoord());
+
 }

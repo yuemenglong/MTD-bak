@@ -28,6 +28,9 @@ var Svg = React.createClass({
         copy.push({ x: x, y: y, width: width, height: height, key: key, style: style });
         this.setState({ rects: copy });
     },
+    clear: function() {
+        this.setState({ lines: [], rects: [] });
+    },
     render: function() {
         return html(`svg({...this.props})`).inner(function() {
             this.state.lines.map(function(item) {
@@ -42,4 +45,3 @@ var Svg = React.createClass({
 });
 
 module.exports = Svg;
-

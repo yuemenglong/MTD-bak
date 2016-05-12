@@ -1,49 +1,63 @@
-var test = require("./test");
-test();
+var Svg = require("./svg");
+var Bar = require("./bar");
+var data = require("./2001.json");
+var _ = require("lodash");
 
-// var Svg = require("./svg");
-// var Bar = require("./bar");
-// var data = require("./2001.json");
+var WINDOW_WIDTH = 100;
+var WINDOW_HEIGHT = 100;
 
-// var WINDOW_WIDTH = 100;
-// var WINDOW_HEIGHT = 100;
+var svg = ReactDOM.render(
+    html("Svg(width={WINDOW_WIDTH}, height={WINDOW_HEIGHT})"),
+    document.body
+);
+init();
+refresh();
 
-// var svg = ReactDOM.render(
-//     html("Svg(width={WINDOW_WIDTH}, height={WINDOW_HEIGHT})"),
-//     document.body
-// );
+$(document).keydown(function(e) {
+    if (e.keyCode === 39) {
+        next();
+    } else if (e.keyCode === 37) {
+        prev();
+    }
+})
 
-// function init() {
-//     Bar.push(data);
-//     Bar.updateBars();
-//     var w = Bar.window();
-//     w.x1 = 0;
-//     w.x2 = WINDOW_WIDTH;
-//     w.height = WINDOW_HEIGHT;
-//     Bar.updateWindow(w);
-//     drawBars(Bar.displayBars());
-// }
+function init() {
+    svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    Bar.push(data);
+    Bar.updateBars();
+    Bar.setWindowSize(100, 100);
+    Bar.setWindowPos(-100);
+    Bar.normalizeWindow();
+    Bar.updateWindow();
+}
 
-// function drawBars(bars) {
-//     bars.map(drawBar);
-// }
+function refresh() {
+    svg.clear();
+    svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    Bar.displayBars().map(function(item) {
+        var rect = item.getRectCoord();
+        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2);
+    });
+}
 
-// function drawBar(bar) {
-//     var rect = bar.getRectCoord();
-//     svg.drawRect(rect);
-// }
+function next() {
+    var x = Bar.window().x1 - Bar.WIDTH - Bar.GAP;
+    if (x <= 0) {
+        x = 0;
+    }
+    Bar.setWindowPos(x);
+    Bar.normalizeWindow();
+    Bar.updateWindow();
+    refresh();
+}
 
-// init();
-// console.log("hello");
-
-// console.log(Bar.originBars());
-// console.log(Bar.displayBars());
-// console.log(Bar.window());
-
-
-
-// var i = 0;
-// setInterval(function() {
-//     svg.drawLine(0, 0, 100, i * 5);
-//     i++;
-// }, 1000);
+function prev() {
+    var x = Bar.window().x1 + Bar.WIDTH + Bar.GAP;
+    if (x >= Bar.max()) {
+        x = Bar.max();
+    }
+    Bar.setWindowPos(x);
+    Bar.normalizeWindow();
+    Bar.updateWindow();
+    refresh();
+}
