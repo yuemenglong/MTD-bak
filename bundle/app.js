@@ -1,4 +1,223 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Svg = require('./svg');
+var Bar = require('./bar');
+var data = require('./data/2001.json');
+var _ = require('lodash');
+var WINDOW_WIDTH = 100;
+var WINDOW_HEIGHT = 100;
+var svg = ReactDOM.render(React.createElement(Svg, { width: WINDOW_WIDTH, height: WINDOW_HEIGHT }), document.body);
+init();
+refresh();
+$(document).keydown(function (e) {
+    if (e.keyCode === 39) {
+        next();
+    } else if (e.keyCode === 37) {
+        prev();
+    }
+});
+function init() {
+    svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    Bar.push(data);
+    Bar.updateBars();
+    Bar.setWindowSize(100, 100);
+    Bar.setWindowPos(-100);
+    Bar.normalizeWindow();
+    Bar.updateWindow();
+}
+function refresh() {
+    svg.clear();
+    svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    Bar.displayBars().map(function (item) {
+        var rect = item.getRectCoord();
+        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2, '#000', item.color());
+        var line = item.getUpperLineCoord();
+        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
+        var line = item.getUnderLineCoord();
+        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
+    });
+}
+function next() {
+    var x = Bar.window().x1 - Bar.WIDTH - Bar.GAP;
+    if (x <= 0) {
+        x = 0;
+    }
+    Bar.setWindowPos(x);
+    Bar.normalizeWindow();
+    Bar.updateWindow();
+    refresh();
+}
+function prev() {
+    var x = Bar.window().x1 + Bar.WIDTH + Bar.GAP;
+    if (x >= Bar.max()) {
+        x = Bar.max();
+    }
+    Bar.setWindowPos(x);
+    Bar.normalizeWindow();
+    Bar.updateWindow();
+    refresh();
+}
+},{"./bar":2,"./data/2001.json":3,"./svg":4,"lodash":5}],2:[function(require,module,exports){
+var _ = require("lodash");
+
+var originBars = [];
+
+var Window = {
+    x1: 0,
+    x2: 100,
+    y1: 0,
+    y2: 0,
+    width: 100,
+    height: 100,
+}
+
+var displayBars = [];
+
+function Bar(open, high, low, close, datetime) {
+    this.open = open;
+    this.high = high;
+    this.low = low;
+    this.close = close;
+    this.datetime = datetime;
+    this.x1 = null;
+    this.y1 = null;
+    this.x2 = null;
+    this.y2 = null;
+}
+
+Bar.WIDTH = 10;
+Bar.GAP = 5;
+
+Bar.max = function() {
+    return _(originBars).nth(-1).x2;
+}
+
+Bar.window = function() {
+    return _.clone(Window);
+}
+
+Bar.setWindowSize = function(width, height) {
+    Window.width = width;
+    Window.height = height;
+}
+
+Bar.setWindowPos = function(x) {
+    if (x >= 0) {
+        Window.x1 = x;
+        Window.x2 = Window.x1 + Window.width;
+    } else {
+        var max = _(originBars).nth(-1).x2;
+        Window.x1 = max + x;
+        Window.x2 = Window.x1 + Window.width;
+    }
+}
+
+Bar.normalizeWindow = function() {
+    var n = _(originBars).sortedIndexBy({ x2: Window.x1 }, "x2");
+    var first = _(originBars).nth(n);
+    Window.x1 = first.x1 - Bar.GAP / 2;
+    Window.x2 = Window.x1 + Window.width;
+}
+
+Bar.updateWindow = function() {
+    var start = _.sortedIndexBy(originBars, { x2: Window.x1 }, "x2");
+    var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
+    displayBars = originBars.slice(start, end);
+
+    var high = _(displayBars).maxBy(item => item.high);
+    var low = _(displayBars).minBy(item => item.low);
+
+    Window.y1 = low.low;
+    Window.y2 = high.high;
+}
+
+Bar.originBars = function() {
+    return originBars;
+}
+
+Bar.displayBars = function() {
+    return displayBars;
+}
+
+Bar.push = function(bar) {
+    if (Array.isArray(bar)) {
+        bar.map(Bar.push);
+        return;
+    }
+    if (bar instanceof Bar) {
+        originBars.push(bar);
+    } else {
+        originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
+            new Date(bar.datetime)));
+    }
+}
+
+Bar.unshift = function(bar) {
+    if (Array.isArray(bar)) {
+        bar.map(Bar.unshift);
+        return;
+    }
+    if (bar instanceof Bar) {
+        originBars.unshift(bar);
+    } else {
+        originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
+            new Date(bar.datetime)));
+    }
+}
+
+Bar.updateBars = function() {
+    if (!originBars.length) {
+        return;
+    }
+    originBars[0].x1 = 0.5 * Bar.GAP;
+    for (var i in originBars) {
+        (i > 0) && (originBars[i].x1 = originBars[i - 1].x2 + Bar.GAP);
+        originBars[i].x2 = originBars[i].x1 + Bar.WIDTH;
+        originBars[i].y1 = Math.min(originBars[i].open, originBars[i].close);
+        originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
+    }
+
+}
+
+Bar.prototype.getRectCoord = function() {
+    var x1 = Window.x2 - this.x1;
+    var x2 = Window.x2 - this.x2;
+    var y1 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+
+Bar.prototype.getUpperLineCoord = function() {
+    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
+    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
+    var y1 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.high) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+Bar.prototype.getUnderLineCoord = function() {
+    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
+    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
+    var y1 = (Window.y2 - this.low) / (Window.y2 - Window.y1) * Window.height;
+    var y2 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
+    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+}
+
+Bar.prototype.color = function() {
+    if (this.open >= this.close) {
+        return "#FFF";
+    } else {
+        return "#000";
+    }
+}
+
+module.exports = Bar;
+
+if (require.main == module) {
+
+}
+
+},{"lodash":5}],3:[function(require,module,exports){
 module.exports=[
   {
     "datetime": "2001-02-23 12:00:00",
@@ -211,240 +430,7 @@ module.exports=[
     "close": 0.917
   }
 ]
-},{}],2:[function(require,module,exports){
-var Svg = require('./svg');
-var Bar = require('./bar');
-var data = require('./2001.json');
-var _ = require('lodash');
-var WINDOW_WIDTH = 100;
-var WINDOW_HEIGHT = 100;
-var svg = ReactDOM.render(React.createElement(Svg, { width: WINDOW_WIDTH, height: WINDOW_HEIGHT }), document.body);
-init();
-refresh();
-$(document).keydown(function (e) {
-    if (e.keyCode === 39) {
-        next();
-    } else if (e.keyCode === 37) {
-        prev();
-    }
-});
-function init() {
-    svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    Bar.push(data);
-    Bar.updateBars();
-    Bar.setWindowSize(100, 100);
-    Bar.setWindowPos(-100);
-    Bar.normalizeWindow();
-    Bar.updateWindow();
-}
-function refresh() {
-    svg.clear();
-    svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    Bar.displayBars().map(function (item) {
-        var rect = item.getRectCoord();
-        svg.drawRect(rect.x1, rect.y1, rect.x2, rect.y2, '#888', item.color());
-        var line = item.getUpperLineCoord();
-        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
-        var line = item.getUnderLineCoord();
-        svg.drawLine(line.x1, line.y1, line.x2, line.y2);
-    });
-}
-function next() {
-    var x = Bar.window().x1 - Bar.WIDTH - Bar.GAP;
-    if (x <= 0) {
-        x = 0;
-    }
-    Bar.setWindowPos(x);
-    Bar.normalizeWindow();
-    Bar.updateWindow();
-    refresh();
-}
-function prev() {
-    var x = Bar.window().x1 + Bar.WIDTH + Bar.GAP;
-    if (x >= Bar.max()) {
-        x = Bar.max();
-    }
-    Bar.setWindowPos(x);
-    Bar.normalizeWindow();
-    Bar.updateWindow();
-    refresh();
-}
-},{"./2001.json":1,"./bar":3,"./svg":4,"lodash":5}],3:[function(require,module,exports){
-var _ = require("lodash");
-
-var originBars = [];
-
-var Window = {
-    x1: 0,
-    x2: 100,
-    y1: 0,
-    y2: 0,
-    width: 100,
-    height: 100,
-}
-
-var displayBars = [];
-
-function Bar(open, high, low, close, datetime) {
-    this.open = open;
-    this.high = high;
-    this.low = low;
-    this.close = close;
-    this.datetime = datetime;
-    this.x1 = null;
-    this.y1 = null;
-    this.x2 = null;
-    this.y2 = null;
-}
-
-Bar.WIDTH = 10;
-Bar.GAP = 5;
-
-Bar.max = function() {
-    return _(originBars).nth(-1).x2;
-}
-
-Bar.window = function() {
-    return _.clone(Window);
-}
-
-Bar.setWindowSize = function(width, height) {
-    Window.width = width;
-    Window.height = height;
-}
-
-Bar.setWindowPos = function(x) {
-    if (x >= 0) {
-        Window.x1 = x;
-        Window.x2 = Window.x1 + Window.width;
-    } else {
-        var max = _(originBars).nth(-1).x2;
-        Window.x1 = max + x;
-        Window.x2 = Window.x1 + Window.width;
-    }
-}
-
-Bar.normalizeWindow = function() {
-    var n = _(originBars).sortedIndexBy({ x2: Window.x1 }, "x2");
-    var first = _(originBars).nth(n);
-    Window.x1 = first.x1 - Bar.GAP / 2;
-    Window.x2 = Window.x1 + Window.width;
-}
-
-Bar.updateWindow = function() {
-    var start = _.sortedIndexBy(originBars, { x2: Window.x1 }, "x2");
-    var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
-    displayBars = originBars.slice(start, end);
-
-    var high = _(displayBars).maxBy(item => item.high);
-    var low = _(displayBars).minBy(item => item.low);
-
-    Window.y1 = low.low;
-    Window.y2 = high.high;
-}
-
-Bar.originBars = function() {
-    return originBars;
-}
-
-Bar.displayBars = function() {
-    return displayBars;
-}
-
-Bar.push = function(bar) {
-    if (Array.isArray(bar)) {
-        bar.map(Bar.push);
-        return;
-    }
-    if (bar instanceof Bar) {
-        originBars.push(bar);
-    } else {
-        originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
-            new Date(bar.datetime)));
-    }
-}
-
-Bar.unshift = function(bar) {
-    if (Array.isArray(bar)) {
-        bar.map(Bar.unshift);
-        return;
-    }
-    if (bar instanceof Bar) {
-        originBars.unshift(bar);
-    } else {
-        originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
-            new Date(bar.datetime)));
-    }
-}
-
-Bar.updateBars = function() {
-    if (!originBars.length) {
-        return;
-    }
-    originBars[0].x1 = 0.5 * Bar.GAP;
-    for (var i in originBars) {
-        (i > 0) && (originBars[i].x1 = originBars[i - 1].x2 + Bar.GAP);
-        originBars[i].x2 = originBars[i].x1 + Bar.WIDTH;
-        originBars[i].y1 = Math.min(originBars[i].open, originBars[i].close);
-        originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
-    }
-
-}
-
-Bar.prototype.getRectCoord = function() {
-    var x1 = Window.x2 - this.x1;
-    var x2 = Window.x2 - this.x2;
-    var y1 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
-    var y2 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
-    return { x1: x1, y1: y1, x2: x2, y2: y2 };
-}
-
-
-Bar.prototype.getUpperLineCoord = function() {
-    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
-    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
-    var y1 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
-    var y2 = (Window.y2 - this.high) / (Window.y2 - Window.y1) * Window.height;
-    return { x1: x1, y1: y1, x2: x2, y2: y2 };
-}
-
-Bar.prototype.getUnderLineCoord = function() {
-    var x1 = Window.x2 - (this.x1 + this.x2) / 2;
-    var x2 = Window.x2 - (this.x1 + this.x2) / 2;
-    var y1 = (Window.y2 - this.low) / (Window.y2 - Window.y1) * Window.height;
-    var y2 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
-    return { x1: x1, y1: y1, x2: x2, y2: y2 };
-}
-
-Bar.prototype.color = function() {
-    if (this.open >= this.close) {
-        return "#FFF";
-    } else {
-        return "#000";
-    }
-}
-
-module.exports = Bar;
-
-if (require.main == module) {
-    var data = require("./2001.json");
-    var WINDOW_WIDTH = 100;
-    var WINDOW_HEIGHT = 100;
-    init();
-
-    function init() {
-        Bar.push(data);
-        Bar.updateBars();
-        Bar.setWindowSize(100, 100);
-        Bar.setWindowPos(-100);
-        Bar.normalizeWindow();
-        Bar.updateWindow();
-        console.log(Bar.window());
-    }
-
-}
-
-},{"./2001.json":1,"lodash":5}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var Svg = React.createClass({
     displayName: 'Svg',
 
@@ -16667,4 +16653,4 @@ module.exports = Svg;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[2]);
+},{}]},{},[1]);

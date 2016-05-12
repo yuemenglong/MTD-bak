@@ -155,19 +155,5 @@ Bar.prototype.color = function() {
 module.exports = Bar;
 
 if (require.main == module) {
-    var data = require("./2001.json");
-    var WINDOW_WIDTH = 100;
-    var WINDOW_HEIGHT = 100;
-    init();
-
-    function init() {
-        Bar.push(data);
-        Bar.updateBars();
-        Bar.setWindowSize(100, 100);
-        Bar.setWindowPos(-100);
-        Bar.normalizeWindow();
-        Bar.updateWindow();
-        console.log(Bar.window());
-    }
 
 }

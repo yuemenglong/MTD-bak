@@ -41,3 +41,10 @@ gulp.task('clean', ["build", "pack"], function() {
     //     .pipe(path(del));
     return gulp.src("build").pipe(path(del));
 });
+
+
+gulp.task('watch', function() {
+    gulp.watch("src/**/*.js", ["default"]);
+    gulp.watch("src/**/*.jsx", ["default"]);
+    gulp.watch("src/**/*.json", ["default"]);
+});
