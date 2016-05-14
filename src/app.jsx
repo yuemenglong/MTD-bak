@@ -7,7 +7,7 @@ var WINDOW_WIDTH = 100;
 var WINDOW_HEIGHT = 100;
 
 var svg = ReactDOM.render(
-    html("Svg(width={WINDOW_WIDTH}, height={WINDOW_HEIGHT})"),
+    jade("Svg(width={WINDOW_WIDTH}, height={WINDOW_HEIGHT})"),
     document.body
 );
 init();

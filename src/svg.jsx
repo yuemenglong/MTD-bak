@@ -32,13 +32,13 @@ var Svg = React.createClass({
         this.setState({ lines: [], rects: [] });
     },
     render: function() {
-        return html(`svg({...this.props})`).inner(function() {
+        return jade(`svg({...this.props}) #{}#{}`, function() {
             this.state.lines.map(function(item) {
-                return html("line({...item})");
+                return jade("line({...item})");
             })
-        }).and(function() {
+        }, function() {
             this.state.rects.map(function(item) {
-                return html("rect({...item})");
+                return jade("rect({...item})");
             });
         });
     }

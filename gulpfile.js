@@ -21,7 +21,7 @@ gulp.task('build', function() {
         .pipe(rename({ extname: ".js" }))
         .pipe(addsrc("src/**/*.js"))
         .pipe(addsrc("src/**/*.json"))
-        // .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
+        .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
         .pipe(gulp.dest("build"));
 });
 
