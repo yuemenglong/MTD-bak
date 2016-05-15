@@ -11,11 +11,10 @@ var DatePicker = React.createClass({
         }
         var date = _(arguments).filter(_.isDate).nth(0);
         var panel = getPanelData(date);
-        console.log(panel);
         this.setState({ panel: panel });
     },
     onMouseOver: function(row, column, e) {
-        var panel = _.clone(this.state.panel);
+        var panel = _.cloneDeep(this.state.panel);
         delete panel[lastRow][lastColumn].mouseOver;
         panel[row][column].mouseOver = true;
         lastRow = row;
