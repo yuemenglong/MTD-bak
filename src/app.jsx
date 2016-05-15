@@ -1,25 +1,28 @@
+// var classes = ["a", "b"];
+
+// ReactDOM.render(
+//     jade("div(className='a b') hello"),
+//     document.body
+// );
+
 var DatePicker = require("./date-picker");
 var picker = ReactDOM.render(
     jade("DatePicker"),
     document.body
 );
 
-function getPanelData(from) {
-    var panel = [];
-    for (var i = 1; i <= 35; i++) {
-        if (i % 7 === 1) {
-            panel.push([]);
-        }
-        _(panel).nth(-1).push(from + i);
-    }
-    return panel;
-}
+picker.setDate(new Date(2016, 3, 1));
 
-var i = 0;
-$(document).keydown(function(e) {
-    var panel = getPanelData(i++);
-    picker.setPanelData(panel);
-})
+// function getPanelData(from) {
+//     var panel = [];
+//     for (var i = 1; i <= 35; i++) {
+//         if (i % 7 === 1) {
+//             panel.push([]);
+//         }
+//         _(panel).nth(-1).push(from + i);
+//     }
+//     return panel;
+// }
 
 
 // var Svg = require("./svg");

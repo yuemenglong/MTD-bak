@@ -33,11 +33,11 @@ var Svg = React.createClass({
     },
     render: function() {
         return jade(`svg({...this.props}) #{}#{}`, function() {
-            this.state.lines.map(function(item) {
+            return this.state.lines.map(function(item) {
                 return jade("line({...item})");
             })
         }, function() {
-            this.state.rects.map(function(item) {
+            return this.state.rects.map(function(item) {
                 return jade("rect({...item})");
             });
         });

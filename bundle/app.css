@@ -4,4 +4,18 @@
 
 .date-picker table td {
   text-align: center;
+  border: solid 1px #888;
+  color: #888;
+}
+
+.date-picker table td.this-month {
+  color: #000;
+}
+
+.date-picker table td.select {
+  background-color: #888;
+}
+
+.date-picker table td.mouse-over {
+  background-color: #888;
 }
