@@ -11,8 +11,6 @@ var picker = ReactDOM.render(
     document.body
 );
 
-picker.setDate(new Date(2016, 3, 1));
-
 // function getPanelData(from) {
 //     var panel = [];
 //     for (var i = 1; i <= 35; i++) {

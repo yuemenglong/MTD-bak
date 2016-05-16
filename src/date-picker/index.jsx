@@ -1,31 +1,59 @@
 var _ = require("lodash");
 var React = require("react");
 
-var lastRow = 0;
-var lastColumn = 0;
+var DatePickerProto = function() {
+    //{day, thisMonth, week, select}
+    function getPanelData(year, month, day) {
+        if (arguments.length === 3) {
+            return arguments.callee(new Date(year, month - 1, day));
+        }
+        var date = _(arguments).filter(_.isDate).nth(0);
+        var info = { day: date.getDate(), thisMonth: true, week: date.getDay() };
+        var ret = [info];
+        var prev = date;
+        var finishPrev = prev.getMonth() !== date.getMonth();
+        var reachSunday = prev.getDay() === 0;
+        while (!finishPrev || !reachSunday) {
+            prev = moveDate(prev, -1);
+            info = { day: prev.getDate(), thisMonth: prev.getMonth() === date.getMonth(), week: prev.getDay() };
+            finishPrev = prev.getMonth() !== date.getMonth();
+            reachSunday = prev.getDay() === 0;
+            ret.unshift(info);
+        }
+        var next = date;
+        var finishNext = next.getMonth() !== date.getMonth();
+        var reachSaturday = next.getDay() === 6;
+        while (!finishNext || !reachSaturday) {
+            next = moveDate(next, 1);
+            info = { day: next.getDate(), thisMonth: next.getMonth() === date.getMonth(), week: next.getDay() };
+            finishNext = next.getMonth() !== date.getMonth();
+            reachSaturday = next.getDay() === 6;
+            ret.push(info);
+        }
+        return _(ret).chunk(7).value();
+    }
 
-var DatePicker = React.createClass({
-    setDate: function(year, month, day) {
+    function moveDate(date, day) {
+        return new Date(date.valueOf() + day * 24 * 3600 * 1000);
+    }
+    this.setDate = function(year, month, day) {
         if (arguments.length === 3) {
             return arguments.callee(new Date(year, month - 1, day));
         }
         var date = _(arguments).filter(_.isDate).nth(0);
         var panel = getPanelData(date);
         this.setState({ panel: panel });
-    },
-    onMouseOver: function(row, column, e) {
-        var panel = _.cloneDeep(this.state.panel);
-        delete panel[lastRow][lastColumn].mouseOver;
-        panel[row][column].mouseOver = true;
-        lastRow = row;
-        lastColumn = column;
-        this.setState({ panel: panel });
-    },
-    getInitialState: function() {
-        var panel = [];
+    }
+    this.onMouseOver = function(row, column, e) {
+            var mouseOver = { row: row, column: column };
+            this.setState({ mouseOver: mouseOver });
+        }
+        //{panel, select, mouseOver}
+    this.getInitialState = function() {
+        var panel = getPanelData(new Date());
         return { panel: panel };
-    },
-    render: function() {
+    }
+    this.render = function() {
         var that = this;
         return jade(`
             div(className="date-picker")
@@ -46,10 +74,7 @@ var DatePicker = React.createClass({
                             if (item.thisMonth) {
                                 className.push("this-month");
                             }
-                            if (item.select) {
-                                className.push("select");
-                            }
-                            if (item.mouseOver) {
+                            if (_.isEqual(that.state.mouseOver, { row: i, column: j })) {
                                 className.push("mouse-over");
                             }
                             className = className.join(" ");
@@ -61,46 +86,13 @@ var DatePicker = React.createClass({
             }
         )
     }
-})
+}
+
+var DatePicker = React.createClass(new DatePickerProto());
 
 module.exports = DatePicker;
 
-//{day, thisMonth, week, select}
-function getPanelData(year, month, day) {
-    if (arguments.length === 3) {
-        return arguments.callee(new Date(year, month - 1, day));
-    }
-    var date = _(arguments).filter(_.isDate).nth(0);
-    var info = { day: date.getDate(), thisMonth: true, week: date.getDay(), select: true };
-    var ret = [info];
-    var prev = date;
-    var finishPrev = prev.getMonth() !== date.getMonth();
-    var reachSunday = prev.getDay() === 0;
-    while (!finishPrev || !reachSunday) {
-        prev = moveDate(prev, -1);
-        info = { day: prev.getDate(), thisMonth: prev.getMonth() === date.getMonth(), week: prev.getDay() };
-        finishPrev = prev.getMonth() !== date.getMonth();
-        reachSunday = prev.getDay() === 0;
-        ret.unshift(info);
-    }
-    var next = date;
-    var finishNext = next.getMonth() !== date.getMonth();
-    var reachSaturday = next.getDay() === 6;
-    while (!finishNext || !reachSaturday) {
-        next = moveDate(next, 1);
-        info = { day: next.getDate(), thisMonth: next.getMonth() === date.getMonth(), week: next.getDay() };
-        finishNext = next.getMonth() !== date.getMonth();
-        reachSaturday = next.getDay() === 6;
-        ret.push(info);
-    }
-    return _(ret).chunk(7).value();
-}
-
-function moveDate(date, day) {
-    return new Date(date.valueOf() + day * 24 * 3600 * 1000);
-}
 
 if (require.main == module) {
-    var ret = getPanelData(2000, 1, 8);
     console.log(ret);
 }
