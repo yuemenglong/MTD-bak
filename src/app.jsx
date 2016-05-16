@@ -1,17 +1,32 @@
-// var classes = ["a", "b"];
+var _ = require("lodash");
+var React = require("react");
+var ReactDOM = require("react-dom");
 
-// ReactDOM.render(
-//     jade("div(className='a b') hello"),
-//     document.body
-// );
+//{year}
+function YearSelectorClass() {
+    this.getInitialState = function() {
+        return { year: new Date().getFullYear() };
+    }
+    this.render = function() {
+        return jade(`
+            div(className="year-selector")
+                input(type="text" name="year" value={this.state.year})
+                ul`,
+            function() {
+                return _.range(1900, 2100).map(function(item) {
+                    return jade("li(key={item}) {item}");
+                })
+            }
+        );
+    }
+}
 
-var DatePicker = require("./date-picker");
-var picker = ReactDOM.render(
-    jade("DatePicker"),
+var YearSelector = React.createClass(new YearSelectorClass());
+
+var app = ReactDOM.render(
+    jade("YearSelector"),
     document.body
 );
-
-picker.setDate(new Date(2016, 3, 1));
 
 // function getPanelData(from) {
 //     var panel = [];
