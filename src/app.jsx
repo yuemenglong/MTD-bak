@@ -5,11 +5,29 @@
 //     document.body
 // );
 
+var App = React.createClass({
+    render: function() {
+        return jade(`
+			DatePicker(ref="datePicker")`);
+    }
+})
+
 var DatePicker = require("./date-picker");
-var picker = ReactDOM.render(
-    jade("DatePicker"),
+var app = ReactDOM.render(
+    jade("App"),
     document.body
 );
+
+// $("input[value='prev']").click(function() {
+//     var datePicker = app.refs.datePicker;
+//     var date = datePicker.getDate();
+//     date.setDate(1);
+//     date.setMonth(date.getMonth() - 1);
+//     datePicker.setMonth(date);
+// })
+// $("input[value='next']").click(function() {
+//     console.log("next");
+// })
 
 // function getPanelData(from) {
 //     var panel = [];

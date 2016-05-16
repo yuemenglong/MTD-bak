@@ -1,8 +1,8 @@
 var _ = require("lodash");
 var React = require("react");
 
-//{panel, mouseOver, select, date}
-var DatePickerProto = function() {
+//{panel, mouseOver, date}
+var DatePickerPanelClass = function() {
     //{day, thisMonth, week}
     function getPanelData(year, month, day) {
         if (arguments.length === 3) {
@@ -24,35 +24,34 @@ var DatePickerProto = function() {
         var next = date;
         var finishNext = next.getMonth() !== date.getMonth();
         var reachSaturday = next.getDay() === 6;
-        while (!finishNext || !reachSaturday) {
+        while (ret.length != 6 * 7) {
             next = moveDate(next, 1);
             info = { day: next.getDate(), thisMonth: next.getMonth() === date.getMonth(), week: next.getDay() };
-            finishNext = next.getMonth() !== date.getMonth();
-            reachSaturday = next.getDay() === 6;
+            // finishNext = next.getMonth() !== date.getMonth();
+            // reachSaturday = next.getDay() === 6;
             ret.push(info);
         }
         return _(ret).chunk(7).value();
     }
 
-    function moveDate(date, day) {
-        return new Date(date.valueOf() + day * 24 * 3600 * 1000);
+    this.getDate = function() {
+        return new Date(this.state.date);
     }
-
-    function getSelectPos(date, panel) {
-        var select = null;
-        panel.map(function(line, i) {
-            line.map(function(item, j) {
-                if (item.day == date.getDate()) {
-                    select = { row: i, column: j };
-                }
-            })
-        })
-        return select;
-    }
-    this.pickHandler = null;
     this.setDate = function(year, month, day) {
         if (arguments.length === 3) {
             return arguments.callee(new Date(year, month - 1, day));
+        }
+        var date = _(arguments).filter(_.isDate).nth(0);
+        var panel = getPanelData(date);
+        this.setState({ panel: panel, date: date });
+    }
+    this.setMonth = function(year, month) {
+        if (arguments.length === 2) {
+            var date = new Date(year, month - 1, this.state.date.getDate());
+            while (date.getMonth() != month) {
+                date = moveDate(date, -1);
+            }
+            return arguments.callee(date);
         }
         var date = _(arguments).filter(_.isDate).nth(0);
         var panel = getPanelData(date);
@@ -67,25 +66,29 @@ var DatePickerProto = function() {
         var newDate = null;
         if (!item.thisMonth && item.day > 15) {
             //prev month
-            newDate = new Date(this.state.date.valueOf() - 30 * 86400 * 1000);
+            newDate = moveMonth(this.state.date, -1);
             newDate.setDate(item.day);
+            this.setMonth(newDate);
         } else if (!item.thisMonth && item.day < 15) {
             //next month
-            newDate = new Date(this.state.date.valueOf() + 30 * 86400 * 1000);
+            newDate = moveMonth(this.state.date, 1);
             newDate.setDate(item.day);
+            this.setMonth(newDate);
         } else {
             newDate = new Date(this.state.date);
             newDate.setDate(item.day);
         }
         this.setState({ date: newDate });
+        this.props.onPick && this.props.onPick(newDate);
     }
     this.onMouseLeave = function(e) {
         this.setState({ mouseOver: null });
     }
     this.getInitialState = function() {
         //{panel, select, mouseOver}
-        var panel = getPanelData(new Date());
-        return { panel: panel, date: new Date() };
+        var date = this.props.date || new Date();
+        var panel = getPanelData(date);
+        return { panel: panel, date: date };
     }
     this.render = function() {
         var that = this;
@@ -133,11 +136,73 @@ var DatePickerProto = function() {
     }
 }
 
-var DatePicker = React.createClass(new DatePickerProto());
+//{date}
+var DatePickerClass = function() {
+    this.getInitialState = function() {
+        return { date: new Date() };
+    }
+    this.prevMonth = function() {
+        var date = new Date(this.state.date);
+        date = moveMonth(date, -1);
+        this.refs.panel.setDate(date);
+        this.setState({ date: date });
+    }
+    this.nextMonth = function() {
+        var date = new Date(this.state.date);
+        date = moveMonth(date, 1);
+        this.refs.panel.setDate(date);
+        this.setState({ date: date });
+    }
+    this.onPick = function(date) {
+        this.setState({ date: date });
+    }
+    this.render = function() {
+        return jade(`
+            div
+                input(type="button" name="prev" value="prev" onClick={this.prevMonth})
+                input(type="button" name="next" value="next" onClick={this.nextMonth})
+                span {this.state.date.toLocaleString()}
+                DatePickerPanel(ref="panel" date={this.state.date} onPick={this.onPick})
+            `);
+    }
+}
+
+var DatePickerPanel = React.createClass(new DatePickerPanelClass());
+var DatePicker = React.createClass(new DatePickerClass());
+
+function moveDate(date, day) {
+    return new Date(date.valueOf() + day * 24 * 3600 * 1000);
+}
+
+function moveMonth(date, month) {
+    var cur = new Date(date);
+    cur.setDate(1);
+    cur.setMonth(cur.getMonth() + month);
+    var targetMonth = cur.getMonth();
+    cur.setDate(date.getDate());
+    while (cur.getMonth() != targetMonth) {
+        cur = moveDate(cur, -1);
+    }
+    return cur;
+}
+
+function moveYear(date, year) {
+    var cur = new Date(date);
+    cur.setDate(1);
+    cur.setFullYear(cur.getFullYear() + year);
+    var targetMonth = cur.getMonth();
+    cur.setDate(date.getDate());
+    while (cur.getMonth() != targetMonth) {
+        cur = moveDate(cur, -1);
+    }
+    return cur;
+}
 
 module.exports = DatePicker;
 
 
 if (require.main == module) {
-    console.log(ret);
+    var date = new Date();
+    var ret = moveMonth(date, -1);
+    console.log(ret.toLocaleString());
 }
