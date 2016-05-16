@@ -1,8 +1,9 @@
 var _ = require("lodash");
 var React = require("react");
 
+//{panel, mouseOver, select, date}
 var DatePickerProto = function() {
-    //{day, thisMonth, week, select}
+    //{day, thisMonth, week}
     function getPanelData(year, month, day) {
         if (arguments.length === 3) {
             return arguments.callee(new Date(year, month - 1, day));
@@ -36,28 +37,64 @@ var DatePickerProto = function() {
     function moveDate(date, day) {
         return new Date(date.valueOf() + day * 24 * 3600 * 1000);
     }
+
+    function getSelectPos(date, panel) {
+        var select = null;
+        panel.map(function(line, i) {
+            line.map(function(item, j) {
+                if (item.day == date.getDate()) {
+                    select = { row: i, column: j };
+                }
+            })
+        })
+        return select;
+    }
+    this.pickHandler = null;
     this.setDate = function(year, month, day) {
         if (arguments.length === 3) {
             return arguments.callee(new Date(year, month - 1, day));
         }
         var date = _(arguments).filter(_.isDate).nth(0);
         var panel = getPanelData(date);
-        this.setState({ panel: panel });
+        this.setState({ panel: panel, date: date });
     }
     this.onMouseOver = function(row, column, e) {
-            var mouseOver = { row: row, column: column };
-            this.setState({ mouseOver: mouseOver });
+        var mouseOver = { row: row, column: column };
+        this.setState({ mouseOver: mouseOver });
+    }
+    this.onClick = function(row, column, e) {
+        var item = this.state.panel[row][column];
+        var newDate = null;
+        if (!item.thisMonth && item.day > 15) {
+            //prev month
+            newDate = new Date(this.state.date.valueOf() - 30 * 86400 * 1000);
+            newDate.setDate(item.day);
+        } else if (!item.thisMonth && item.day < 15) {
+            //next month
+            newDate = new Date(this.state.date.valueOf() + 30 * 86400 * 1000);
+            newDate.setDate(item.day);
+        } else {
+            newDate = new Date(this.state.date);
+            newDate.setDate(item.day);
         }
-        //{panel, select, mouseOver}
+        this.setState({ date: newDate });
+    }
+    this.onMouseLeave = function(e) {
+        this.setState({ mouseOver: null });
+    }
     this.getInitialState = function() {
+        //{panel, select, mouseOver}
         var panel = getPanelData(new Date());
-        return { panel: panel };
+        return { panel: panel, date: new Date() };
     }
     this.render = function() {
         var that = this;
+        var props = {
+            onMouseLeave: that.onMouseLeave,
+        }
         return jade(`
             div(className="date-picker")
-                table
+                table({...props})
                     thead
                         tr #{}
                     tbody #{}`,
@@ -74,12 +111,20 @@ var DatePickerProto = function() {
                             if (item.thisMonth) {
                                 className.push("this-month");
                             }
-                            if (_.isEqual(that.state.mouseOver, { row: i, column: j })) {
+                            var td = { row: i, column: j };
+                            if (_.isEqual(that.state.mouseOver, td)) {
                                 className.push("mouse-over");
                             }
-                            className = className.join(" ");
-                            var onMouseOver = that.onMouseOver.bind(that, i, j);
-                            return jade("td(className={className} key={item.day} onMouseOver={onMouseOver}) {item.day}")
+                            if (item.thisMonth && item.day == that.state.date.getDate()) {
+                                className.push("select");
+                            }
+                            var props = {
+                                key: item.day,
+                                className: className.join(" "),
+                                onMouseOver: that.onMouseOver.bind(null, i, j),
+                                onClick: that.onClick.bind(null, i, j)
+                            }
+                            return jade("td({...props}) {item.day}")
                         })
                     });
                 })
