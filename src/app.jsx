@@ -2,16 +2,14 @@ var _ = require("lodash");
 var React = require("react");
 var ReactDOM = require("react-dom");
 var Window = require("./window");
+var YearSelect = require("./year-selector");
+
+var list = _.range(1990, 2010);
 
 var app = ReactDOM.render(
-    jade("Window"),
+    jade("YearSelect(list={list} dft={list[0]})"),
     document.body
 );
-
-app.setDate(new Date(1999, 1, 1));
-setInterval(function() {
-    app.next();
-}, 1000);
 
 
 // function getPanelData(from) {
