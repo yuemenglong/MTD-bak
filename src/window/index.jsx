@@ -1,16 +1,19 @@
 var Bar = require("./bar");
 var Data = require("../data");
 var Svg = require("../svg");
+var _ = require("lodash");
 
-//{displayBars}
 function WindowClass() {
-    this.render = function() {
-        var style = {
-            width: this.props.width,
-            height: this.props.height
-        };
-        return jade("Svg(style={style})", function() {
+    this.setDate = function(date) {
+        var n = _.sortedIndexBy(Bar.originBars(), { datetime: date }, "datetime");
+    }
+    this.prev = function() {
 
-        });
+    }
+    this.next = function() {
+
+    }
+    this.render = function() {
+        return jade("Svg({...this.props})");
     }
 }

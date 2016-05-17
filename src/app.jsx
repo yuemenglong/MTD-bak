@@ -1,30 +1,10 @@
 var _ = require("lodash");
 var React = require("react");
 var ReactDOM = require("react-dom");
-
-//{year}
-function YearSelectorClass() {
-    this.getInitialState = function() {
-        return { year: new Date().getFullYear() };
-    }
-    this.render = function() {
-        return jade(`
-            div(className="year-selector")
-                input(type="text" name="year" value={this.state.year})
-                ul`,
-            function() {
-                return _.range(1900, 2100).map(function(item) {
-                    return jade("li(key={item}) {item}");
-                })
-            }
-        );
-    }
-}
-
-var YearSelector = React.createClass(new YearSelectorClass());
+var Window = require("./window");
 
 var app = ReactDOM.render(
-    jade("YearSelector"),
+    jade("Window"),
     document.body
 );
 

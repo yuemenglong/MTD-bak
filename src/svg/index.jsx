@@ -1,16 +1,16 @@
-var Svg = React.createClass({
-    getInitialState: function() {
+var SvgClass = function() {
+    this.getInitialState = function() {
         return { lines: [], rects: [] };
-    },
-    drawLine: function(x1, y1, x2, y2, clr) {
+    }
+    this.drawLine = function(x1, y1, x2, y2, clr) {
         clr = clr || "#000";
         var copy = this.state.lines.slice();
         var key = `${x1}${y1}${x2}${y2}`;
         var style = { stroke: clr };
         copy.push({ x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style });
         this.setState({ lines: copy });
-    },
-    drawRect: function(x1, y1, x2, y2, clr, fillClr) {
+    }
+    this.drawRect = function(x1, y1, x2, y2, clr, fillClr) {
         clr = clr || "#000";
         fillClr = fillClr || null;
         var copy = this.state.rects.slice();
@@ -27,11 +27,11 @@ var Svg = React.createClass({
         }
         copy.push({ x: x, y: y, width: width, height: height, key: key, style: style });
         this.setState({ rects: copy });
-    },
-    clear: function() {
+    }
+    this.clear = function() {
         this.setState({ lines: [], rects: [] });
-    },
-    render: function() {
+    }
+    this.render = function() {
         return jade(`svg({...this.props}) #{}#{}`, function() {
             return this.state.lines.map(function(item) {
                 return jade("line({...item})");
@@ -42,6 +42,9 @@ var Svg = React.createClass({
             });
         });
     }
-});
+}
+
+
+var Svg = React.createClass(new SvgClass());
 
 module.exports = Svg;
