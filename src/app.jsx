@@ -5,14 +5,26 @@
 //     document.body
 // );
 
+// var DatePicker = require("./date-picker");
 var App = React.createClass({
     render: function() {
+        var style = {
+            width: 200,
+            height: 200,
+            position: "relative",
+        }
+        var s2 = {
+            width: 50,
+            height: 50
+        }
         return jade(`
-			DatePicker(ref="datePicker")`);
+        	div(style={style})
+        		div(className="center" style={s2})
+        	`);
+        // DatePicker(ref="datePicker")`);
     }
 })
 
-var DatePicker = require("./date-picker");
 var app = ReactDOM.render(
     jade("App"),
     document.body

@@ -92,15 +92,11 @@ var DatePickerPanelClass = function() {
     }
     this.render = function() {
         var that = this;
-        var props = {
-            onMouseLeave: that.onMouseLeave,
-        }
         return jade(`
-            div(className="date-picker")
-                table({...props})
-                    thead
-                        tr #{}
-                    tbody #{}`,
+            table
+                thead
+                    tr #{}
+                tbody(onMouseLeave={this.onMouseLeave}) #{}`,
             function() {
                 return ["日", "一", "二", "三", "四", "五", "六"].map(function(item, i) {
                     return jade("th(key={i}) {item}");
@@ -137,7 +133,7 @@ var DatePickerPanelClass = function() {
 }
 
 //{date}
-var DatePickerClass = function() {
+var DatePickerSelectorClass = function() {
     this.getInitialState = function() {
         return { date: new Date() };
     }
@@ -153,12 +149,24 @@ var DatePickerClass = function() {
         this.refs.panel.setDate(date);
         this.setState({ date: date });
     }
+    this.prevYear = function() {
+        var date = new Date(this.state.date);
+        date = moveYear(date, -1);
+        this.refs.panel.setDate(date);
+        this.setState({ date: date });
+    }
+    this.nextYear = function() {
+        var date = new Date(this.state.date);
+        date = moveYear(date, 1);
+        this.refs.panel.setDate(date);
+        this.setState({ date: date });
+    }
     this.onPick = function(date) {
         this.setState({ date: date });
     }
     this.render = function() {
         return jade(`
-            div
+            div(className="date-picker")
                 input(type="button" name="prev" value="prev" onClick={this.prevMonth})
                 input(type="button" name="next" value="next" onClick={this.nextMonth})
                 span {this.state.date.toLocaleString()}
@@ -168,7 +176,7 @@ var DatePickerClass = function() {
 }
 
 var DatePickerPanel = React.createClass(new DatePickerPanelClass());
-var DatePicker = React.createClass(new DatePickerClass());
+var DatePickerSelector = React.createClass(new DatePickerSelectorClass());
 
 function moveDate(date, day) {
     return new Date(date.valueOf() + day * 24 * 3600 * 1000);
@@ -198,7 +206,7 @@ function moveYear(date, year) {
     return cur;
 }
 
-module.exports = DatePicker;
+module.exports = DatePickerSelector;
 
 
 if (require.main == module) {
