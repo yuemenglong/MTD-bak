@@ -1,45 +1,33 @@
-// var classes = ["a", "b"];
+var _ = require("lodash");
+var React = require("react");
+var ReactDOM = require("react-dom");
 
-// ReactDOM.render(
-//     jade("div(className='a b') hello"),
-//     document.body
-// );
-
-// var DatePicker = require("./date-picker");
-var App = React.createClass({
-    render: function() {
-        var style = {
-            width: 200,
-            height: 200,
-            position: "relative",
-        }
-        var s2 = {
-            width: 50,
-            height: 50
-        }
-        return jade(`
-        	div(style={style})
-        		div(className="center" style={s2})
-        	`);
-        // DatePicker(ref="datePicker")`);
+//{year}
+function YearSelectorClass() {
+    this.getInitialState = function() {
+        return { year: new Date().getFullYear() };
     }
-})
+    this.render = function() {
+        return jade(`
+            div(className="year-selector")
+                input(type="text" name="year" value={this.state.year})
+                ul`,
+            function() {
+                return _.range(1900, 2100).map(function(item) {
+                    return jade("li(key={item}) {item}");
+                })
+            }
+        );
+    }
+}
+
+var YearSelector = React.createClass(new YearSelectorClass());
 
 var app = ReactDOM.render(
-    jade("App"),
+    jade("YearSelector"),
     document.body
 );
 
-// $("input[value='prev']").click(function() {
-//     var datePicker = app.refs.datePicker;
-//     var date = datePicker.getDate();
-//     date.setDate(1);
-//     date.setMonth(date.getMonth() - 1);
-//     datePicker.setMonth(date);
-// })
-// $("input[value='next']").click(function() {
-//     console.log("next");
-// })
 
 // function getPanelData(from) {
 //     var panel = [];
