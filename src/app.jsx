@@ -8,6 +8,11 @@ var app = ReactDOM.render(
     document.body
 );
 
+app.setDate(new Date(1999, 1, 1));
+setInterval(function() {
+    app.next();
+}, 1000);
+
 
 // function getPanelData(from) {
 //     var panel = [];

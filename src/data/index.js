@@ -5,3 +5,5 @@ function Data() {
         return data;
     }
 }
+
+module.exports = new Data();

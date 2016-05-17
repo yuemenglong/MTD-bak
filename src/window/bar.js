@@ -52,9 +52,9 @@ Bar.setWindowPos = function(x) {
     }
 }
 
-Bar.normalizeWindow = function() {
+Bar.adjustWindow = function() {
     var n = _(originBars).sortedIndexBy({ x2: Window.x1 }, "x2");
-    var first = _(originBars).nth(n);
+    var first = originBars[n] || originBars[n - 1];
     Window.x1 = first.x1 - Bar.GAP / 2;
     Window.x2 = Window.x1 + Window.width;
 }
@@ -85,24 +85,18 @@ Bar.push = function(bar) {
         return;
     }
     if (bar instanceof Bar) {
-        originBars.push(bar);
+        originBars.unshift(bar);
     } else {
-        originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
+        originBars.unshift(new Bar(bar.open, bar.high, bar.low, bar.close,
             new Date(bar.datetime)));
     }
 }
 
-Bar.unshift = function(bar) {
-    if (Array.isArray(bar)) {
-        bar.map(Bar.unshift);
-        return;
-    }
-    if (bar instanceof Bar) {
-        originBars.unshift(bar);
-    } else {
-        originBars.push(new Bar(bar.open, bar.high, bar.low, bar.close,
-            new Date(bar.datetime)));
-    }
+Bar.pop = function(n) {
+    n = n || 1;
+    _.range(n).map(function() {
+        originBars.pop(bar);
+    })
 }
 
 Bar.updateBars = function() {
