@@ -2,12 +2,12 @@ var _ = require("lodash");
 var React = require("react");
 var ReactDOM = require("react-dom");
 var Window = require("./window");
-var YearSelect = require("./year-selector");
+var Selector = require("./selector");
 
 var list = _.range(1990, 2010);
 
 var app = ReactDOM.render(
-    jade("YearSelect(list={list} dft={list[0]})"),
+    jade("Selector(list={list} select='0')"),
     document.body
 );
 
