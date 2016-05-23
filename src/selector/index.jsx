@@ -1,11 +1,24 @@
 var _ = require("lodash");
 
-//{list, select}
+function normalizePropsList(list) {
+    var ret = list.map(function(item) {
+        if (typeof item === "object") {
+            return item;
+        } else {
+            return { value: item, option: item };
+        }
+    });
+    [].splice.bind(list, 0, list.length).apply(list, ret);
+    // list.splice(0, list.length);
+    // list.concat(ret);
+}
+
+//{list, value}
 //{select, ulDisplay}
 function SelectorClass() {
     this.getInitialState = function() {
-        var select = this.props.list[this.props.select];
-        select = typeof select === "object" ? select : { value: select, index: this.props.select, option: select };
+        normalizePropsList(this.props.list);
+        var select = this.props.list.filter(o => o.value == this.props.value)[0] || this.props.list[0];
         return { select: select, ulDisplay: "none" };
     }
     this.onFocus = function() {

@@ -7,7 +7,7 @@ var Selector = require("./selector");
 var list = _.range(1990, 2010);
 
 var app = ReactDOM.render(
-    jade("Selector(list={list} select='0')"),
+    jade("Selector(list={list} value='2000')"),
     document.body
 );
 
