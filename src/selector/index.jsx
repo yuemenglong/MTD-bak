@@ -13,14 +13,15 @@ function normalizePropsList(list) {
     // list.concat(ret);
 }
 
-//{list, value}
-//{select, ulDisplay}
+//{list, value, listener}
+//{select, ulDisplay, listener}
 function SelectorClass() {
     this.listener = [];
     this.getInitialState = function() {
         normalizePropsList(this.props.list);
         var select = this.props.list.filter(o => o.value == this.props.value)[0] || this.props.list[0];
-        return { select: select, ulDisplay: "none" };
+        var listener = this.props.listener ? [this.props.listener] : [];
+        return { select: select, ulDisplay: "none", listener: listener };
     }
     this.onFocus = function() {
         this.setState({ ulDisplay: "block" });
@@ -30,7 +31,7 @@ function SelectorClass() {
     }
     this.onLiMouseDown = function(value, i, option) {
         this.setState({ select: { value: value, index: i, option: option } });
-        this.listener.map(l => l(value, option));
+        this.state.listener.map(l => l(value, option));
     }
     this.getValue = function() {
         return this.state.select.value;
@@ -45,11 +46,14 @@ function SelectorClass() {
         var select = this.props.list.filter(o => o.value == value)[0] || this.props.list[0];
         this.setState({ select: select });
     }
-    this.addListener = function(listener) {
-        this.listener.push(listener);
+    this.addListener = function(l) {
+        var listener = _.clone(this.state.listener);
+        listener.push(l)
+        this.setState({ listener: listener });
     }
-    this.removeListener = function(listener) {
-        this.listener = this.listener.filter(o => o !== listener);
+    this.removeListener = function(l) {
+        var listener = this.state.listener.filter(o => o !== l);
+        this.setState({ listener: listener });
     }
     this.render = function() {
         var ulStyle = {
@@ -61,7 +65,7 @@ function SelectorClass() {
         }
         var that = this;
         return jade(`
-            div(className="year-selector")
+            div(className="selector")
                 input(type="text" value={this.state.select.option} className="input" readOnly="true" {...event})
                 ul(style={ulStyle})`,
             function() {

@@ -179,18 +179,28 @@ var DatePickerSelectorClass = function() {
     this.onPick = function(date) {
         this.setDate(date);
     }
-    this.componentDidMount = function() {
-        this.refs.yearSelector.addListener(this.onYearChange);
-        this.refs.monthSelector.addListener(this.onMonthChange);
-    }
     this.render = function() {
+        var yearSelector = {
+            key: this.state.date.getFullYear(),
+            ref:"yearSelector",
+            list: _.range(2000, 2021),
+            value: this.state.date.getFullYear(),
+            listener: this.onYearChange,
+        }
+        var monthSelector = {
+            key: this.state.date.getMonth() + 1,
+            ref:"monthSelector",
+            list: _.range(1, 13),
+            value: this.state.date.getMonth() + 1,
+            listener: this.onMonthChange,
+        }
         return jade(`
             div(className="date-picker")
                 input(type="button" name="prevYear" value="prevYear" onClick={this.prevYear})
-                Selector(key={this.state.date.getFullYear()} ref="yearSelector" list={_.range(2000, 2020)} value={this.state.date.getFullYear()})
+                Selector({...yearSelector})
                 input(type="button" name="nextYear" value="nextYear" onClick={this.nextYear})
                 input(type="button" name="prevMonth" value="prevMonth" onClick={this.prevMonth})
-                Selector(key={this.state.date.getMonth()} ref="monthSelector" list={_.range(1, 12)} value={this.state.date.getMonth()+1})
+                Selector({...monthSelector})
                 input(type="button" name="nextMonth" value="nextMonth" onClick={this.nextMonth})
                 span {this.state.date.toLocaleString()}
                 DatePickerPanel(key={this.state.date} ref="panel" date={this.state.date} onPick={this.onPick})
@@ -232,8 +242,3 @@ function moveYear(date, year) {
 module.exports = DatePickerSelector;
 
 
-if (require.main == module) {
-    var date = new Date();
-    var ret = moveMonth(date, -1);
-    console.log(ret.toLocaleString());
-}
