@@ -1,6 +1,7 @@
 var _ = require("lodash");
-var React = require("react");
+var Selector = require("../selector");
 
+//{date}
 //{panel, mouseOver, date}
 var DatePickerPanelClass = function() {
     //{day, thisMonth, week}
@@ -33,7 +34,12 @@ var DatePickerPanelClass = function() {
         }
         return _(ret).chunk(7).value();
     }
-
+    this.getInitialState = function() {
+        //{panel, select, mouseOver}
+        var date = this.props.date || new Date();
+        var panel = getPanelData(date);
+        return { panel: panel, date: date };
+    }
     this.getDate = function() {
         return new Date(this.state.date);
     }
@@ -84,12 +90,6 @@ var DatePickerPanelClass = function() {
     this.onMouseLeave = function(e) {
         this.setState({ mouseOver: null });
     }
-    this.getInitialState = function() {
-        //{panel, select, mouseOver}
-        var date = this.props.date || new Date();
-        var panel = getPanelData(date);
-        return { panel: panel, date: date };
-    }
     this.render = function() {
         var that = this;
         return jade(`
@@ -133,44 +133,67 @@ var DatePickerPanelClass = function() {
 }
 
 //{date}
+//{date}
 var DatePickerSelectorClass = function() {
+    this.listener = [];
     this.getInitialState = function() {
-        return { date: new Date() };
+        return { date: this.props.date || new Date() };
+    }
+    this.setDate = function(date) {
+        this.setState({ date: date });
+        this.listener.map(l => l(date));
     }
     this.prevMonth = function() {
         var date = new Date(this.state.date);
         date = moveMonth(date, -1);
-        this.refs.panel.setDate(date);
-        this.setState({ date: date });
+        this.setDate(date);
     }
     this.nextMonth = function() {
         var date = new Date(this.state.date);
         date = moveMonth(date, 1);
-        this.refs.panel.setDate(date);
-        this.setState({ date: date });
+        this.setDate(date);
     }
     this.prevYear = function() {
         var date = new Date(this.state.date);
         date = moveYear(date, -1);
-        this.refs.panel.setDate(date);
-        this.setState({ date: date });
+        this.setDate(date);
     }
     this.nextYear = function() {
         var date = new Date(this.state.date);
         date = moveYear(date, 1);
-        this.refs.panel.setDate(date);
-        this.setState({ date: date });
+        this.setDate(date);
+    }
+    this.addListener = function(listener) {
+        this.listener.push(listener);
+    }
+    this.onYearChange = function(year) {
+        var date = new Date(this.state.date);
+        date = moveYear(date, year - date.getFullYear());
+        this.setDate(date);
+    }
+    this.onMonthChange = function(month) {
+        var date = new Date(this.state.date);
+        date = moveMonth(date, month - (date.getMonth() + 1));
+        this.setDate(date);
     }
     this.onPick = function(date) {
-        this.setState({ date: date });
+        this.setDate(date);
+    }
+    this.componentDidMount = function() {
+        this.refs.yearSelector.addListener(this.onYearChange);
+        this.refs.monthSelector.addListener(this.onMonthChange);
     }
     this.render = function() {
         return jade(`
             div(className="date-picker")
-                input(type="button" name="prev" value="prev" onClick={this.prevMonth})
-                input(type="button" name="next" value="next" onClick={this.nextMonth})
+                input(type="button" name="prevYear" value="prevYear" onClick={this.prevYear})
+                Selector(key={this.state.date.getFullYear()} ref="yearSelector" list={_.range(2000, 2020)} value={this.state.date.getFullYear()})
+                input(type="button" name="nextYear" value="nextYear" onClick={this.nextYear})
+                input(type="button" name="prevMonth" value="prevMonth" onClick={this.prevMonth})
+                Selector(key={this.state.date.getMonth()} ref="monthSelector" list={_.range(1, 12)} value={this.state.date.getMonth()+1})
+                input(type="button" name="nextMonth" value="nextMonth" onClick={this.nextMonth})
                 span {this.state.date.toLocaleString()}
-                DatePickerPanel(ref="panel" date={this.state.date} onPick={this.onPick})
+                DatePickerPanel(key={this.state.date} ref="panel" date={this.state.date} onPick={this.onPick})
             `);
     }
 }

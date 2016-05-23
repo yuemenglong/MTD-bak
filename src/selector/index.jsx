@@ -16,6 +16,7 @@ function normalizePropsList(list) {
 //{list, value}
 //{select, ulDisplay}
 function SelectorClass() {
+    this.listener = [];
     this.getInitialState = function() {
         normalizePropsList(this.props.list);
         var select = this.props.list.filter(o => o.value == this.props.value)[0] || this.props.list[0];
@@ -29,6 +30,7 @@ function SelectorClass() {
     }
     this.onLiMouseDown = function(value, i, option) {
         this.setState({ select: { value: value, index: i, option: option } });
+        this.listener.map(l => l(value, option));
     }
     this.getValue = function() {
         return this.state.select.value;
@@ -38,6 +40,16 @@ function SelectorClass() {
     }
     this.getIndex = function() {
         return this.state.select.index;
+    }
+    this.setValue = function(value) {
+        var select = this.props.list.filter(o => o.value == value)[0] || this.props.list[0];
+        this.setState({ select: select });
+    }
+    this.addListener = function(listener) {
+        this.listener.push(listener);
+    }
+    this.removeListener = function(listener) {
+        this.listener = this.listener.filter(o => o !== listener);
     }
     this.render = function() {
         var ulStyle = {

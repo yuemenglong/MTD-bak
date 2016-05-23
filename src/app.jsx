@@ -3,11 +3,12 @@ var React = require("react");
 var ReactDOM = require("react-dom");
 var Window = require("./window");
 var Selector = require("./selector");
+var DatePicker = require("./date-picker");
 
 var list = _.range(1990, 2010);
 
 var app = ReactDOM.render(
-    jade("Selector(list={list} value='2000')"),
+    jade("DatePicker"),
     document.body
 );
 
