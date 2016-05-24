@@ -1,16 +1,19 @@
 var Bar = require("./bar");
 var data = require("../data");
 var Svg = require("../svg");
+var alg = require("./alg");
 var _ = require("lodash");
 var React = require("react");
 var ReactDOM = require("react-dom");
+
+var GRID_WIDTH = 32;
 
 //use bar as state
 function WindowClass() {
     this.getDefaultProps = function() {
         return {
-            width: 1000,
-            height: 300,
+            width: 1280,
+            height: 640,
             style: {
                 backgroundColor: "#888",
             }
@@ -27,14 +30,18 @@ function WindowClass() {
         Bar.updateWindow();
         this.refs.svg.clear();
         var rects = Bar.displayBars().map(bar => bar.getRectCoord());
-        this.refs.svg.drawRects(rects);
         var upperLines = Bar.displayBars().map(bar => bar.getUpperLineCoord());
         var underLines = Bar.displayBars().map(bar => bar.getUnderLineCoord());
-        this.refs.svg.drawLines(upperLines.concat(underLines));
+        var gridLines = alg.getGridLines(GRID_WIDTH,GRID_WIDTH, this.props.width, this.props.height);
+        var lines = [].concat(upperLines).concat(underLines).concat(gridLines);
+        // var style = { "stroke-dasharray": "3 3", stroke: "#FFF" };
+        // lines.push({ x1: 0, y1: 0, x2: 100, y2: 100, style: style })
+        this.refs.svg.drawRects(rects);
+        this.refs.svg.drawLines(lines);
         // this.refs.svg.drawLines(underLines);
     }
     this.setDate = function(date) {
-        var n = Bar.getIndexByTime(Bar.originBars(), date);
+        var n = alg.getIndexByTime(Bar.originBars(), date);
         var bar = Bar.originBars()[n];
         Bar.setWindowPos(bar.x1);
         this.refresh();

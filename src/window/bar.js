@@ -25,8 +25,11 @@ function Bar(open, high, low, close, datetime) {
     this.y2 = null;
 }
 
-Bar.WIDTH = 10;
-Bar.GAP = 5;
+Bar.WIDTH = 4;
+Bar.GAP = 4;
+Bar.strokeWidth = 0.8;
+
+Bar.RIGHT_GAP = 0;
 
 Bar.max = function() {
     return _(originBars).nth(-1).x2;
@@ -53,14 +56,14 @@ Bar.setWindowPos = function(x) {
 }
 
 Bar.adjustWindow = function() {
-    var n = _(originBars).sortedIndexBy({ x2: Window.x1 }, "x2");
+    var n = _(originBars).sortedIndexBy({ x2: Window.x1 - Bar.RIGHT_GAP }, "x2");
     var first = originBars[n] || originBars[n - 1];
     Window.x1 = first.x1 - Bar.GAP / 2;
     Window.x2 = Window.x1 + Window.width;
 }
 
 Bar.updateWindow = function() {
-    var start = _.sortedIndexBy(originBars, { x2: Window.x1 }, "x2");
+    var start = _.sortedIndexBy(originBars, { x2: Window.x1 - Bar.RIGHT_GAP }, "x2");
     var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
     displayBars = originBars.slice(start, end);
 
@@ -110,7 +113,6 @@ Bar.updateBars = function() {
         originBars[i].y1 = Math.min(originBars[i].open, originBars[i].close);
         originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
     }
-
 }
 
 Bar.prototype.getRectCoord = function() {
@@ -119,7 +121,8 @@ Bar.prototype.getRectCoord = function() {
     var y1 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
     var y2 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
     var fillClr = this.close >= this.open ? "#FFF" : "#000";
-    return { x1: x1, y1: y1, x2: x2, y2: y2, fillClr: fillClr };
+    var style = { fill: fillClr, stroke: "#000", strokeWidth: Bar.strokeWidth };
+    return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
 
@@ -128,7 +131,8 @@ Bar.prototype.getUpperLineCoord = function() {
     var x2 = Window.x2 - (this.x1 + this.x2) / 2;
     var y1 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
     var y2 = (Window.y2 - this.high) / (Window.y2 - Window.y1) * Window.height;
-    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+    var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
+    return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
 Bar.prototype.getUnderLineCoord = function() {
@@ -136,7 +140,8 @@ Bar.prototype.getUnderLineCoord = function() {
     var x2 = Window.x2 - (this.x1 + this.x2) / 2;
     var y1 = (Window.y2 - this.low) / (Window.y2 - Window.y1) * Window.height;
     var y2 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
-    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+    var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
+    return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
 Bar.prototype.color = function() {
@@ -147,45 +152,4 @@ Bar.prototype.color = function() {
     }
 }
 
-//返回大于等于给定时间的第一个
-//如果给定时间大于所有的，则返回最大的时间，idx为0
-Bar.getIndexByTime = function(bars, datetime, from, to) {
-    from = from === undefined ? 0 : from;
-    to = to === undefined ? bars.length - 1 : to;
-    if (from == to) {
-        return from;
-    }
-    var mid = _.floor((from + to) / 2);
-    var small = bars[mid + 1].datetime;
-    var large = bars[mid].datetime;
-    if (small < datetime && datetime <= large) {
-        return mid;
-    }
-    if (datetime <= small) {
-        return arguments.callee(bars, datetime, mid + 1, to);
-    } else {
-        return arguments.callee(bars, datetime, from, mid);
-    }
-}
-
 module.exports = Bar;
-
-if (require.main == module) {
-    var data = require("../data");
-    Bar.push(data.getData());
-    var bars = Bar.originBars();
-    var n = Bar.getIndexByTime(bars, bars[bars.length - 1].datetime);
-    console.log(n);
-    for (var i = 0; i < bars.length; i++) {
-        var n = Bar.getIndexByTime(bars, bars[i].datetime);
-        console.log(n);
-    }
-    for (var i = 0; i < bars.length; i++) {
-        var n = Bar.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() + 1));
-        console.log(n);
-    }
-    for (var i = 0; i < bars.length; i++) {
-        var n = Bar.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() - 1));
-        console.log(n);
-    }
-}
