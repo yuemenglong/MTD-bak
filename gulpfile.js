@@ -22,7 +22,7 @@ gulp.task("src", ["build", "pack", "clean"]);
 gulp.task('build', function() {
     return gulp.src("src/**/*.jsx")
         .pipe(jadeToJsx())
-        .pipe(babel({ presets: ['react'] }))
+        .pipe(babel({ presets: ['react', 'es2015'] }))
         .pipe(rename({ extname: ".js" }))
         .pipe(addsrc(["src/**/*.js", "src/**/*.json"]))
         .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
