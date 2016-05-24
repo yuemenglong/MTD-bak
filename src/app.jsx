@@ -7,46 +7,20 @@ var DatePicker = require("./date-picker");
 
 var list = _.range(1990, 2010);
 
-var app = ReactDOM.render(
-    jade("DatePicker"),
-    document.body
-);
-
-
-// function getPanelData(from) {
-//     var panel = [];
-//     for (var i = 1; i <= 35; i++) {
-//         if (i % 7 === 1) {
-//             panel.push([]);
-//         }
-//         _(panel).nth(-1).push(from + i);
-//     }
-//     return panel;
-// }
-
-
-// var Svg = require("./svg");
-// var Bar = require("./bar");
-// var data = require("./data/2001.json");
-// var _ = require("lodash");
-
-// var WINDOW_WIDTH = 100;
-// var WINDOW_HEIGHT = 100;
-
-// var svg = ReactDOM.render(
-//     jade("Svg(width={WINDOW_WIDTH}, height={WINDOW_HEIGHT})"),
+// var app = ReactDOM.render(
+//     jade("DatePicker"),
 //     document.body
 // );
-// init();
-// refresh();
 
-// $(document).keydown(function(e) {
-//     if (e.keyCode === 39) {
-//         next();
-//     } else if (e.keyCode === 37) {
-//         prev();
-//     }
-// })
+var app = ReactDOM.render(jade("Window"), document.body);
+
+$(document).keydown(function(e) {
+    if (e.keyCode === 39) {
+        app.next();
+    } else if (e.keyCode === 37) {
+        app.prev();
+    }
+})
 
 // function init() {
 //     svg.drawRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);

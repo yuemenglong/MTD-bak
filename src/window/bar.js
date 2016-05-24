@@ -118,7 +118,8 @@ Bar.prototype.getRectCoord = function() {
     var x2 = Window.x2 - this.x2;
     var y1 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
     var y2 = (Window.y2 - this.y2) / (Window.y2 - Window.y1) * Window.height;
-    return { x1: x1, y1: y1, x2: x2, y2: y2 };
+    var fillClr = this.close >= this.open ? "#FFF" : "#000";
+    return { x1: x1, y1: y1, x2: x2, y2: y2, fillClr: fillClr };
 }
 
 

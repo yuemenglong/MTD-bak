@@ -1,3 +1,6 @@
+var React = require("react");
+var ReactDOM = require("react-dom");
+
 var SvgClass = function() {
     this.getInitialState = function() {
         return { lines: [], rects: [] };
@@ -17,7 +20,7 @@ var SvgClass = function() {
             var y1 = line.y1;
             var x2 = line.x2;
             var y2 = line.y2;
-            clr = line.clr || "#000";
+            var clr = line.clr || "#000";
             var key = `${x1}${y1}${x2}${y2}`;
             var style = { stroke: clr };
             copy.push({ x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style });
@@ -49,8 +52,8 @@ var SvgClass = function() {
             var y1 = rect.y1;
             var x2 = rect.x2;
             var y2 = rect.y2;
-            clr = rect.clr || "#000";
-            fillClr = rect.fillClr || null;
+            var clr = rect.clr || "#000";
+            var fillClr = rect.fillClr || null;
             var key = `${x1}${y1}${x2}${y2}`;
             var x = Math.min(x1, x2);
             var y = Math.min(y1, y2);
