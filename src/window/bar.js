@@ -146,8 +146,45 @@ Bar.prototype.color = function() {
     }
 }
 
+//返回大于等于给定时间的第一个
+//如果给定时间大于所有的，则返回最大的时间，idx为0
+Bar.getIndexByTime = function(bars, datetime, from, to) {
+    from = from === undefined ? 0 : from;
+    to = to === undefined ? bars.length - 1 : to;
+    if (from == to) {
+        return from;
+    }
+    var mid = _.floor((from + to) / 2);
+    var small = bars[mid + 1].datetime;
+    var large = bars[mid].datetime;
+    if (small < datetime && datetime <= large) {
+        return mid;
+    }
+    if (datetime <= small) {
+        return arguments.callee(bars, datetime, mid + 1, to);
+    } else {
+        return arguments.callee(bars, datetime, from, mid);
+    }
+}
+
 module.exports = Bar;
 
 if (require.main == module) {
-
+    var data = require("../data");
+    Bar.push(data.getData());
+    var bars = Bar.originBars();
+    var n = Bar.getIndexByTime(bars, bars[bars.length - 1].datetime);
+    console.log(n);
+    for (var i = 0; i < bars.length; i++) {
+        var n = Bar.getIndexByTime(bars, bars[i].datetime);
+        console.log(n);
+    }
+    for (var i = 0; i < bars.length; i++) {
+        var n = Bar.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() + 1));
+        console.log(n);
+    }
+    for (var i = 0; i < bars.length; i++) {
+        var n = Bar.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() - 1));
+        console.log(n);
+    }
 }
