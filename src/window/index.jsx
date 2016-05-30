@@ -30,20 +30,15 @@ function WindowClass() {
     this.refresh = function() {
         Bar.adjustWindow();
         Bar.updateWindow();
-        this.refs.svg.clear();
-        var rects = Bar.displayBars().map(bar => bar.getRectCoord());
+        var state = {};
+        state.rects = Bar.displayBars().map(bar => bar.getRectCoord());
         var upperLines = Bar.displayBars().map(bar => bar.getUpperLineCoord());
         var underLines = Bar.displayBars().map(bar => bar.getUnderLineCoord());
         var gridLines = alg.getGridLines(GRID_WIDTH, GRID_WIDTH, this.props.width, this.props.height);
+        state.lines = [].concat(upperLines).concat(underLines).concat(gridLines);
         var ma = Bar.displayBars().map(bar => bar.getMACoord("ma30")).filter(o => !_.isNil(o));
-        var lines = [].concat(upperLines).concat(underLines).concat(gridLines);
-        // var style = { "stroke-dasharray": "3 3", stroke: "#FFF" };
-        // lines.push({ x1: 0, y1: 0, x2: 100, y2: 100, style: style })
-        this.refs.svg.drawRects(rects);
-        this.refs.svg.drawLines(lines);
-        // this.refs.svg.drawPath([{ x: 10, y: 10 }, { x: 100, y: 100 }, { x: 200, y: 100 }]);
-        this.refs.svg.drawPath(ma);
-        // this.refs.svg.drawLines(underLines);
+        state.paths = [{ points: ma, style: { stroke: '#c00', strokeWidth: '2', fill: 'none' } }];
+        this.setState(state);
     }
     this.setDate = function(date) {
         var n = alg.getIndexByTime(Bar.originBars(), date);
@@ -63,9 +58,10 @@ function WindowClass() {
         this.refresh();
     }
     this.render = function() {
+        var props = Object.assign(this.state, this.props);
         return jade(`
             div(className="svg-window")
-                Svg({...this.props} ref="svg")`);
+                Svg({...props})`);
     }
 }
 

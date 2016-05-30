@@ -2,80 +2,50 @@ var React = require("react");
 var ReactDOM = require("react-dom");
 
 var SvgClass = function() {
-    this.getInitialState = function() {
-        return { lines: [], rects: [] };
+    this.defaultProps = function() {
+        return { lines: [], rects: [], paths: [] };
     }
-    this.drawLine = function(x1, y1, x2, y2, style) {
-        var copy = this.state.lines.slice();
-        var key = `${x1}${y1}${x2}${y2}`;
-        copy.push({ x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style });
-        this.setState({ lines: copy });
+    this.renderLine = function(o) {
+        var key = `${o.x1}${o.y1}${o.x2}${o.y2}`;
+        var style = o.style;
+        var item = { x1: o.x1, y1: o.y1, x2: o.x2, y2: o.y2, key: key, style: style };
+        return jade("line({...item})");
     }
-    this.drawLines = function(lines) {
-        var copy = this.state.lines.slice();
-        lines.map(function(line) {
-            var x1 = line.x1;
-            var y1 = line.y1;
-            var x2 = line.x2;
-            var y2 = line.y2;
-            var style = line.style;
-            var key = `${x1}${y1}${x2}${y2}`;
-            copy.push({ x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style });
-        })
-        this.setState({ lines: copy });
+    this.renderRect = function(o) {
+        var key = `${o.x1}${o.y1}${o.x2}${o.y2}`;
+        var x = Math.min(o.x1, o.x2);
+        var y = Math.min(o.y1, o.y2);
+        var width = Math.max(o.x1, o.x2) - x;
+        var height = Math.max(o.y1, o.y2) - y;
+        var style = o.style;
+        var item = { x: x, y: y, width: width, height: height, key: key, style: style };
+        return jade("rect({...item})");
     }
-    this.drawRect = function(x1, y1, x2, y2, style) {
-        var copy = this.state.rects.slice();
-        var key = `${x1}${y1}${x2}${y2}`;
-        var x = Math.min(x1, x2);
-        var y = Math.min(y1, y2);
-        var width = Math.max(x1, x2) - x;
-        var height = Math.max(y1, y2) - y;
-        copy.push({ x: x, y: y, width: width, height: height, key: key, style: style });
-        this.setState({ rects: copy });
-    }
-    this.drawRects = function(rects) {
-        var copy = this.state.rects.slice();
-        rects.map(function(rect) {
-            var x1 = rect.x1;
-            var y1 = rect.y1;
-            var x2 = rect.x2;
-            var y2 = rect.y2;
-            var style = rect.style;
-            var key = `${x1}${y1}${x2}${y2}`;
-            var x = Math.min(x1, x2);
-            var y = Math.min(y1, y2);
-            var width = Math.max(x1, x2) - x;
-            var height = Math.max(y1, y2) - y;
-            copy.push({ x: x, y: y, width: width, height: height, key: key, style: style });
-        })
-        this.setState({ rects: copy });
-    }
-    this.drawPath = function(points) {
+    this.renderPath = function(o) {
+        var points = o.points;
+        var style = o.style;
         if (!points.length) return;
-        // var buf = [`M${points[0].x} ${points[0].y}`];
-        var buf = points.reduce(function(acc, item) {
-            acc.push(`L ${item.x} ${item.y}`)
-            return acc;
-        }, [`M ${points[0].x} ${points[0].y}`]);
-        var path = buf.join(" ");
-        this.setState({ path: path });
+        var path = points.reduce(function(res, item) {
+            res.push(`L ${item.x} ${item.y}`)
+            return res;
+        }, [`M ${points[0].x} ${points[0].y}`]).join(" ");
+        var key = path;
+        var item = { path: path, key: key, style: style };
+        return jade("path({...item})");
     }
-    this.clear = function() {
-        this.setState({ lines: [], rects: [] });
-    }
+
+    //lines, rects, paths
     this.render = function() {
         var that = this;
+        var dft = { lines: [], rects: [], paths: [] };
+        var props = Object.assign(dft, this.props);
         return jade(`svg({...this.props}) #{}#{}#{}`, function() {
-            return that.state.lines.map(function(item) {
-                return jade("line({...item})");
-            })
+            return props.lines.map(that.renderLine);
         }, function() {
-            return that.state.rects.map(function(item) {
-                return jade("rect({...item})");
-            });
+            return props.rects.map(that.renderRect);
         }, function() {
-            return jade("path(d={that.state.path} stroke='#c00' strokeWidth='2' fill='none')");
+            return props.paths.map(that.renderPath);
+            // return jade("path(d={that.state.path} stroke='#c00' strokeWidth='2' fill='none')");
         });
     }
 }

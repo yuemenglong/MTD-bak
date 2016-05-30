@@ -16,11 +16,14 @@ var concatCss = require("gulp-concat-css");
 
 var exclude = ["react", "react-dom", "lodash", "bluebird", "whatwg-fetch"];
 
-gulp.task('default', ["server", "build", "pack", "clean", "less"]);
+gulp.task('src', ["pre-clean", "server", "build", "pack", "post-clean"]);
+gulp.task('default', ["src", "less"]);
 
-gulp.task("src", ["build", "pack", "clean"]);
+gulp.task('pre-clean', function() {
+    return gulp.src("server").pipe(path(del));
+});
 
-gulp.task("server", function() {
+gulp.task("server", ["pre-clean"], function() {
     return gulp.src("src/**/*.jsx")
         .pipe(jadeToJsx())
         .pipe(babel({ presets: ['react', 'es2015'] }))
@@ -56,7 +59,7 @@ gulp.task("less", function() {
 })
 
 //del js which transformed from jsx
-gulp.task('clean', ["build", "pack"], function() {
+gulp.task('post-clean', ["build", "pack"], function() {
     return gulp.src("build").pipe(path(del));
 });
 
