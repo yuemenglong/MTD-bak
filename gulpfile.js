@@ -16,19 +16,24 @@ var concatCss = require("gulp-concat-css");
 
 var exclude = ["react", "react-dom", "lodash"];
 
-gulp.task('default', ["build", "pack", "clean", "less"]);
+gulp.task('default', ["server", "build", "pack", "clean", "less"]);
 
 gulp.task("src", ["build", "pack", "clean"]);
 
-//trans jsx => js
-gulp.task('build', function() {
-    var excludePattern = "(" + exclude.join(")|(") + ")";
-    var pattern = `^.*require\\((["'])(${excludePattern})\\1\\).*$`;
+gulp.task("server", function() {
     return gulp.src("src/**/*.jsx")
         .pipe(jadeToJsx())
         .pipe(babel({ presets: ['react', 'es2015'] }))
         .pipe(rename({ extname: ".js" }))
-        .pipe(addsrc(["src/**/*.js", "src/**/*.json"]))
+        .pipe(addsrc(["src/**/*.js"]))
+        .pipe(gulp.dest("server"));
+})
+
+//trans jsx => js
+gulp.task('build', ["server"], function() {
+    var excludePattern = "(" + exclude.join(")|(") + ")";
+    var pattern = `^.*require\\((["'])(${excludePattern})\\1\\).*$`;
+    return gulp.src("server/**/*.js")
         // .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
         .pipe(replace(new RegExp(pattern, "gm"), ""))
         .pipe(gulp.dest("build"));

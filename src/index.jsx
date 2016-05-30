@@ -1,5 +1,6 @@
 var React = require("react");
 var ReactDOM = require("react-dom");
+var server = require("react-dom/server");
 
 // var EventEmitter = require('fbemitter').EventEmitter;
 var EventEmitter = require("events").EventEmitter;
@@ -24,6 +25,8 @@ event.on("click", function() {
     console.log("event");
 });
 var Link = React.createClass(new LinkClass());
+// var app = jade("Link(event={event})");
+var html = server.renderToString(jade("Link(event={event} site='2')"));
+console.log(html);
 
-var app = ReactDOM.render(jade("Link(event={event})"), document.body);
-
+module.exports = html;
