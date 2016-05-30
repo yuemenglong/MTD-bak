@@ -4,9 +4,10 @@ html
 		//- link(rel="stylesheet" href="/static/css/site.css")
 		script(src="//cdn.bootcss.com/react/0.14.7/react.js")
 		script(src="//cdn.bootcss.com/react/0.14.7/react-dom.js")
-		script(src="//cdn.bootcss.com/lodash.js/4.12.0/lodash.js")
+		script(src="//cdn.bootcss.com/lodash.js/4.12.0/lodash.min.js")
 		script(src="//cdn.bootcss.com/bluebird/3.3.5/bluebird.min.js")
-		script(src="//cdn.bootcss.com/jquery/2.2.3/jquery.js")
-		link(rel="stylesheet" type="text/css" href="bundle/app.css")
-	body !{app}
-		//- script(src="/bundle/app.js")
+		script(src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js")
+		script(src="//cdn.bootcss.com/fetch/1.0.0/fetch.min.js")
+		link(rel="stylesheet" href="bundle/bundle.css")
+	body 
+		script(src="/bundle/bundle.js")

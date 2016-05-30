@@ -1,5 +1,4 @@
 var Bar = require("./bar");
-var data = require("../data");
 var Svg = require("../svg");
 var alg = require("./alg");
 var _ = require("lodash");
@@ -20,10 +19,13 @@ function WindowClass() {
         };
     }
     this.getInitialState = function() {
-        Bar.push(data.getData());
-        Bar.updateBars();
         Bar.setWindowSize(this.props.width, this.props.height);
         return {};
+    }
+    this.pushData = function(data) {
+        Bar.push(data);
+        Bar.updateBars();
+        this.refresh();
     }
     this.refresh = function() {
         Bar.adjustWindow();
@@ -32,12 +34,15 @@ function WindowClass() {
         var rects = Bar.displayBars().map(bar => bar.getRectCoord());
         var upperLines = Bar.displayBars().map(bar => bar.getUpperLineCoord());
         var underLines = Bar.displayBars().map(bar => bar.getUnderLineCoord());
-        var gridLines = alg.getGridLines(GRID_WIDTH,GRID_WIDTH, this.props.width, this.props.height);
+        var gridLines = alg.getGridLines(GRID_WIDTH, GRID_WIDTH, this.props.width, this.props.height);
+        var ma = Bar.displayBars().map(bar => bar.getMACoord("ma30")).filter(o => !_.isNil(o));
         var lines = [].concat(upperLines).concat(underLines).concat(gridLines);
         // var style = { "stroke-dasharray": "3 3", stroke: "#FFF" };
         // lines.push({ x1: 0, y1: 0, x2: 100, y2: 100, style: style })
         this.refs.svg.drawRects(rects);
         this.refs.svg.drawLines(lines);
+        // this.refs.svg.drawPath([{ x: 10, y: 10 }, { x: 100, y: 100 }, { x: 200, y: 100 }]);
+        this.refs.svg.drawPath(ma);
         // this.refs.svg.drawLines(underLines);
     }
     this.setDate = function(date) {
@@ -56,9 +61,6 @@ function WindowClass() {
         pos = pos >= 0 ? pos : 0;
         Bar.setWindowPos(pos);
         this.refresh();
-    }
-    this.componentDidMount = function() {
-        this.setDate(this.props.date || new Date());
     }
     this.render = function() {
         return jade(`

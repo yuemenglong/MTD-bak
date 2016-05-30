@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var updateMA = require("./ma");
 
 var originBars = [];
 
@@ -9,6 +10,13 @@ var Window = {
     y2: 0,
     width: 100,
     height: 100,
+}
+
+Window.getY = function(y) {
+    return (Window.y2 - y) / (Window.y2 - Window.y1) * Window.height;
+}
+Window.getX = function(x) {
+    return Window.x2 - x;
 }
 
 var displayBars = [];
@@ -57,7 +65,7 @@ Bar.setWindowPos = function(x) {
 
 Bar.adjustWindow = function() {
     var n = _(originBars).sortedIndexBy({ x2: Window.x1 - Bar.RIGHT_GAP }, "x2");
-    var first = originBars[n] || originBars[n - 1];
+    var first = originBars[n] || originBars[n - 1] || { x1: 0 };
     Window.x1 = first.x1 - Bar.GAP / 2;
     Window.x2 = Window.x1 + Window.width;
 }
@@ -67,8 +75,8 @@ Bar.updateWindow = function() {
     var end = _.sortedIndexBy(originBars, { x1: Window.x2 }, "x1");
     displayBars = originBars.slice(start, end);
 
-    var high = _(displayBars).maxBy(item => item.high);
-    var low = _(displayBars).minBy(item => item.low);
+    var high = _(displayBars).maxBy(item => item.high) || { high: 0 };
+    var low = _(displayBars).minBy(item => item.low) || { low: 0 };
 
     Window.y1 = low.low;
     Window.y2 = high.high;
@@ -113,6 +121,7 @@ Bar.updateBars = function() {
         originBars[i].y1 = Math.min(originBars[i].open, originBars[i].close);
         originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
     }
+    updateMA(originBars);
 }
 
 Bar.prototype.getRectCoord = function() {
@@ -142,6 +151,13 @@ Bar.prototype.getUnderLineCoord = function() {
     var y2 = (Window.y2 - this.y1) / (Window.y2 - Window.y1) * Window.height;
     var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
     return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
+}
+
+Bar.prototype.getMACoord = function(name) {
+    if (!this[name]) return;
+    var x = Window.getX((this.x1 + this.x2) / 2);
+    var y = Window.getY(this[name]);
+    return { x: x, y: y };
 }
 
 Bar.prototype.color = function() {

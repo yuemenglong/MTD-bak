@@ -14,7 +14,7 @@ var addsrc = require('gulp-add-src');
 var less = require("gulp-less");
 var concatCss = require("gulp-concat-css");
 
-var exclude = ["react", "react-dom", "lodash"];
+var exclude = ["react", "react-dom", "lodash", "bluebird", "whatwg-fetch"];
 
 gulp.task('default', ["server", "build", "pack", "clean", "less"]);
 
@@ -41,9 +41,9 @@ gulp.task('build', ["server"], function() {
 
 //pack js
 gulp.task('pack', ["build"], function() {
-    return browserify('build/app.js')
+    return browserify('build/bundle.js')
         .bundle()
-        .pipe(source('app.js'))
+        .pipe(source('bundle.js'))
         .pipe(buffer())
         .pipe(gulp.dest('bundle'));
 });
@@ -51,7 +51,7 @@ gulp.task('pack', ["build"], function() {
 gulp.task("less", function() {
     return gulp.src("src/**/*.less")
         .pipe(less())
-        .pipe(concatCss("app.css"))
+        .pipe(concatCss("bundle.css"))
         .pipe(gulp.dest("bundle"));
 })
 
@@ -64,6 +64,5 @@ gulp.task('clean', ["build", "pack"], function() {
 gulp.task('watch', function() {
     gulp.watch("src/**/*.js", ["src"]);
     gulp.watch("src/**/*.jsx", ["src"]);
-    gulp.watch("src/**/*.json", ["src"]);
     gulp.watch("src/**/*.less", ["less"]);
 });

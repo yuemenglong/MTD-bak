@@ -42,20 +42,19 @@ var alg = new Alg();
 module.exports = alg;
 
 if (require.main == module) {
-    var data = require("../data");
-    var bars = data.getData();
-    var n = alg.getIndexByTime(bars, bars[bars.length - 1].datetime);
-    console.log(n);
-    for (var i = 0; i < bars.length; i++) {
-        var n = alg.getIndexByTime(bars, bars[i].datetime);
-        console.log(n);
-    }
-    for (var i = 0; i < bars.length; i++) {
-        var n = alg.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() + 1));
-        console.log(n);
-    }
-    for (var i = 0; i < bars.length; i++) {
-        var n = alg.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() - 1));
-        console.log(n);
-    }
+    // var bars = require("../../data/2001.json");
+    // var n = alg.getIndexByTime(bars, bars[bars.length - 1].datetime);
+    // console.log(n);
+    // for (var i = 0; i < bars.length; i++) {
+    //     var n = alg.getIndexByTime(bars, bars[i].datetime);
+    //     console.log(n);
+    // }
+    // for (var i = 0; i < bars.length; i++) {
+    //     var n = alg.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() + 1));
+    //     console.log(n);
+    // }
+    // for (var i = 0; i < bars.length; i++) {
+    //     var n = alg.getIndexByTime(bars, new Date(bars[i].datetime.valueOf() - 1));
+    //     console.log(n);
+    // }
 }

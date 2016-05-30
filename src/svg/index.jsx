@@ -51,12 +51,22 @@ var SvgClass = function() {
         })
         this.setState({ rects: copy });
     }
+    this.drawPath = function(points) {
+        if (!points.length) return;
+        // var buf = [`M${points[0].x} ${points[0].y}`];
+        var buf = points.reduce(function(acc, item) {
+            acc.push(`L ${item.x} ${item.y}`)
+            return acc;
+        }, [`M ${points[0].x} ${points[0].y}`]);
+        var path = buf.join(" ");
+        this.setState({ path: path });
+    }
     this.clear = function() {
         this.setState({ lines: [], rects: [] });
     }
     this.render = function() {
         var that = this;
-        return jade(`svg({...this.props}) #{}#{}`, function() {
+        return jade(`svg({...this.props}) #{}#{}#{}`, function() {
             return that.state.lines.map(function(item) {
                 return jade("line({...item})");
             })
@@ -64,6 +74,8 @@ var SvgClass = function() {
             return that.state.rects.map(function(item) {
                 return jade("rect({...item})");
             });
+        }, function() {
+            return jade("path(d={that.state.path} stroke='#c00' strokeWidth='2' fill='none')");
         });
     }
 }
