@@ -4,4 +4,4 @@ var Window = require("./window");
 var Svg = require("./svg");
 
 module.exports = jade("Window");
-// module.exports = jade("Svg(width='100' height='100' lines={lines})");
+// module.exports = jade("Svg(width='100' height='100' paths={paths})");

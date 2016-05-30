@@ -30,7 +30,7 @@ var SvgClass = function() {
             return res;
         }, [`M ${points[0].x} ${points[0].y}`]).join(" ");
         var key = path;
-        var item = { path: path, key: key, style: style };
+        var item = { d: path, key: key, style: style };
         return jade("path({...item})");
     }
 
