@@ -12,7 +12,7 @@ var Svg = require("./Svg");
 var GRID_WIDTH = 32;
 
 function reducer(state, action) {
-    state = state || { width: 1280, height: 640, gridWidth: 32, style: { backgroundColor: "#888", }, displayBars: [] };
+    state = state || { gridWidth: 32, style: { width: 1280, height: 640, backgroundColor: "#888", }, displayBars: [] };
     switch (action.type) {
         case "FETCH_DATA":
             Bar.push(data);

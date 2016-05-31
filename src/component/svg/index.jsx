@@ -1,7 +1,7 @@
 var React = require("react");
 var ReactDOM = require("react-dom");
 
-//{width, height, style, lines, rects, paths, texts}
+//{lines, rects, paths, texts}
 var SvgClass = function() {
     this.renderLine = function(o) {
         var key = `${o.x1}${o.y1}${o.x2}${o.y2}`;
@@ -41,8 +41,9 @@ var SvgClass = function() {
     this.render = function() {
         var that = this;
         var dft = { lines: [], rects: [], paths: [], texts: [] };
+        var style = this.props.style;
         var props = Object.assign(dft, this.props);
-        return jade(`svg({...this.props}) #{}#{}#{}#{}`, function() {
+        return jade(`svg(style={style}) #{}#{}#{}#{}`, function() {
             return props.lines.map(that.renderLine);
         }, function() {
             return props.rects.map(that.renderRect);

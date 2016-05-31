@@ -18,7 +18,7 @@ function setRects(props, state) {
 function setLines(props, state) {
     var upperLines = state.displayBars.map(bar => bar.getUpperLineCoord());
     var underLines = state.displayBars.map(bar => bar.getUnderLineCoord());
-    var gridLines = alg.getGridLines(state.gridWidth, state.gridWidth, state.width, state.height);
+    var gridLines = alg.getGridLines(state.gridWidth, state.gridWidth, state.style.width, state.style.height);
     props.lines = [].concat(upperLines).concat(underLines).concat(gridLines);
 }
 
@@ -34,7 +34,7 @@ function setTexts(props, state) {
 }
 
 function mapStateToProps(state) {
-    var props = { width: state.width, height: state.height, style: state.style };
+    var props = { style: state.style };
     var displayBars = state.displayBars;
     setRects(props, state);
     setLines(props, state);
