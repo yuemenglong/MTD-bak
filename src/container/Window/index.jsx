@@ -27,10 +27,11 @@ function reducer(state, action) {
             return state;
     }
 }
-var store = Redux.createStore(reducer);
+
+var store = Redux.createStore(reducer, typeof window !== "undefined" ? window.__INITIAL_STATE__ : undefined);
 
 function WindowClass() {
-    if ($) {
+    if (typeof $ !== "undefined") {
         $(document).keydown(function(e) {
             console.log(e.keyCode);
             if (e.keyCode === 39) {
@@ -55,6 +56,7 @@ function WindowClass() {
 }
 
 module.exports = React.createClass(new WindowClass());
+module.exports.state = store.getState();
 
 
 // //use bar as state
