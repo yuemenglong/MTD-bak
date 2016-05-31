@@ -1,5 +1,6 @@
 var Bar = require("./bar");
 var _ = require("lodash");
+var fetch = require("whatwg-fetch");
 var React = require("react");
 var ReactDOM = require("react-dom");
 var Redux = require("redux");
@@ -13,22 +14,42 @@ var GRID_WIDTH = 32;
 
 function reducer(state, action) {
     state = state || { gridWidth: 32, style: { width: 1280, height: 640, backgroundColor: "#888", }, displayBars: [] };
+    Bar.setWindowSize(state.style.width, state.style.height);
     switch (action.type) {
         case "FETCH_DATA":
-            Bar.push(data);
+            Bar.push(action.data);
             Bar.updateBars();
+            Bar.setWindowPos(Bar.originBars().slice(-1)[0].x1);
             Bar.adjustWindow();
             Bar.updateWindow();
-            return { displayBars: Bar.displayBars() };
+            return Object.assign({}, state, { displayBars: Bar.displayBars() });
         default:
             return state;
     }
 }
+var store = Redux.createStore(reducer);
 
 function WindowClass() {
+    if ($) {
+        $(document).keydown(function(e) {
+            console.log(e.keyCode);
+            if (e.keyCode === 39) {
+                store.dispatch({ type: "MOVE_NEXT" });
+            } else if (e.keyCode === 37) {
+                store.dispatch({ type: "MOVE_PREV" });
+            }
+        })
+        $(document).ready(function() {
+            fetch("/data/2001.json").then(function(res) {
+                return res.json();
+            }).then(function(json) {
+                store.dispatch({ type: "FETCH_DATA", data: json });
+            })
+        })
+    }
     this.render = function() {
         return jade(`
-            Provider(store={Redux.createStore(reducer)})
+            Provider(store={store})
                 Svg`);
     }
 }
