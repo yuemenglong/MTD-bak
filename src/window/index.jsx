@@ -1,5 +1,5 @@
 var Bar = require("./bar");
-var Svg = require("../svg");
+var Svg = require("../component/svg");
 var alg = require("./alg");
 var _ = require("lodash");
 var React = require("react");
