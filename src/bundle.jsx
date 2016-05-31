@@ -2,9 +2,9 @@ var React = require("react");
 var ReactDOM = require("react-dom");
 // var app = require("./app");
 var fetch = require("whatwg-fetch");
-var app = require("./container/App");
+var app = require("./app");
 
-// var app = ReactDOM.render(app, document.body);
+ReactDOM.render(app, document.body);
 // app.refresh();
 
 // fetch("/data/2001.json").then(function(res) {

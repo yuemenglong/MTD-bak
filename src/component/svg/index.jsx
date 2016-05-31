@@ -1,6 +1,7 @@
 var React = require("react");
 var ReactDOM = require("react-dom");
 
+//{width, height, style, lines, rects, paths, texts}
 var SvgClass = function() {
     this.renderLine = function(o) {
         var key = `${o.x1}${o.y1}${o.x2}${o.y2}`;

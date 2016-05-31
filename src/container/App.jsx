@@ -1,9 +1,13 @@
 var EditList = require("../component/EditList");
 var React = require("react");
 var EventEmitter = require("events").EventEmitter;
-var connect = require("react-redux").connect;
-var Provider = require("react-redux").Provider;
-var createStore = require("redux").createStore;
+var ReactRedux = require("react-redux");
+var connect = ReactRedux.connect;
+var Provider = ReactRedux.Provider;
+// var Provider = require("react-redux").Provider;
+var Redux = require("redux");
+var createStore = Redux.createStore;
+// var createStore = require("redux").createStore;
 
 function mapStateToProps(state) {
     return { list: state.list };

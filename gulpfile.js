@@ -15,8 +15,11 @@ var less = require("gulp-less");
 var concatCss = require("gulp-concat-css");
 
 var exclude = ["react", "react-dom", "lodash", "bluebird",
-    "whatwg-fetch", "moment"
+    "whatwg-fetch", "moment", "redux", "react-redux", "events",
 ];
+// var exclude = ["React", "ReactDOM", "Redux", "ReactRedux",
+//     "_", "Promise", "fetch", "moment", "EventEmitter"
+// ];
 
 gulp.task('src', ["pre-clean", "server", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
@@ -46,6 +49,9 @@ gulp.task('build', ["server"], function() {
 
 //pack js
 gulp.task('pack', ["build"], function() {
+    // var b = browserify("build/bundle.js");
+    // exclude.map(o => b.external(o));
+    // return b.bundle()
     return browserify('build/bundle.js')
         .bundle()
         .pipe(source('bundle.js'))
