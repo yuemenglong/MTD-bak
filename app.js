@@ -1,5 +1,5 @@
 var express = require("express");
-var jade = require("pug");
+var jade = require("jade");
 var fs = require("fs");
 var param = require("./server");
 
