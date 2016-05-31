@@ -4,9 +4,12 @@ var fetch = require("whatwg-fetch");
 var React = require("react");
 var ReactDOM = require("react-dom");
 var Redux = require("redux");
+var thunk = require("redux-thunk").default;
 var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
 var Provider = ReactRedux.Provider;
+var createStore = Redux.createStore;
+var applyMiddleware = Redux.applyMiddleware;
 
 var Svg = require("./Svg");
 
@@ -17,18 +20,25 @@ function reducer(state, action) {
     Bar.setWindowSize(state.style.width, state.style.height);
     switch (action.type) {
         case "FETCH_DATA":
+            console.log("FETCH_DATA");
+            return state;
+        case "FETCH_DATA_SUCC":
+            console.log("FETCH_DATA_SUCC");
             Bar.push(action.data);
             Bar.updateBars();
             Bar.setWindowPos(Bar.originBars().slice(-1)[0].x1);
             Bar.adjustWindow();
             Bar.updateWindow();
             return Object.assign({}, state, { displayBars: Bar.displayBars() });
+        case "FETCH_DATA_FAIL":
+            console.log("FETCH_DATA_FAIL");
+            return state;
         default:
             return state;
     }
 }
 
-var store = Redux.createStore(reducer, typeof window !== "undefined" ? window.__INITIAL_STATE__ : undefined);
+var store = applyMiddleware(thunk)(createStore)(reducer, typeof window !== "undefined" ? window.__INITIAL_STATE__ : undefined);
 
 function WindowClass() {
     if (typeof $ !== "undefined") {
@@ -41,11 +51,15 @@ function WindowClass() {
             }
         })
         $(document).ready(function() {
-            fetch("/data/2001.json").then(function(res) {
-                return res.json();
-            }).then(function(json) {
-                store.dispatch({ type: "FETCH_DATA", data: json });
+            store.dispatch(function(dispatch, getState) {
+                store.dispatch({ type: "FETCH_DATA" });
+                fetch("/data/2001.json").then(function(res) {
+                    return res.json();
+                }).then(function(json) {
+                    store.dispatch({ type: "FETCH_DATA_SUCC", data: json });
+                })
             })
+
         })
     }
     this.render = function() {

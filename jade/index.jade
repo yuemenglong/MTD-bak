@@ -3,17 +3,17 @@ html
 		meta(charset="utf-8")
 		script(src="//cdn.bootcss.com/react/0.14.7/react.js")
 		script(src="//cdn.bootcss.com/react/0.14.7/react-dom.js")
+		script(src="//cdn.bootcss.com/redux/3.5.2/redux.js")
+		script(src="//cdn.bootcss.com/react-redux/4.4.5/react-redux.js")
 		script(src="//cdn.bootcss.com/lodash.js/4.12.0/lodash.min.js")
 		script(src="//cdn.bootcss.com/bluebird/3.3.5/bluebird.min.js")
 		script(src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js")
 		script(src="//cdn.bootcss.com/fetch/1.0.0/fetch.min.js")
 		script(src="//cdn.bootcss.com/moment.js/2.13.0/moment.min.js")
 		script(src="//cdn.bootcss.com/EventEmitter/5.0.0/EventEmitter.min.js")
-		script(src="//cdn.bootcss.com/redux/3.5.2/redux.min.js")
-		script(src="//cdn.bootcss.com/react-redux/4.4.5/react-redux.min.js")
 		link(rel="stylesheet" href="bundle/bundle.css")
 		script.
 			window.__INITIAL_STATE__ = !{state}
 	body 
 		#container !{html}
-		//- script(src="/bundle/bundle.js")
+		script(src="/bundle/bundle.js")
