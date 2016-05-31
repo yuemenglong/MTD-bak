@@ -4,6 +4,7 @@ var alg = require("./alg");
 var _ = require("lodash");
 var React = require("react");
 var ReactDOM = require("react-dom");
+var moment = require("moment");
 
 var GRID_WIDTH = 32;
 
@@ -27,17 +28,32 @@ function WindowClass() {
         Bar.updateBars();
         this.refresh();
     }
-    this.refresh = function() {
-        Bar.adjustWindow();
-        Bar.updateWindow();
-        var state = {};
+    this.refreshRects = function(state) {
         state.rects = Bar.displayBars().map(bar => bar.getRectCoord());
+    }
+    this.refreshLines = function(state) {
         var upperLines = Bar.displayBars().map(bar => bar.getUpperLineCoord());
         var underLines = Bar.displayBars().map(bar => bar.getUnderLineCoord());
         var gridLines = alg.getGridLines(GRID_WIDTH, GRID_WIDTH, this.props.width, this.props.height);
         state.lines = [].concat(upperLines).concat(underLines).concat(gridLines);
+    }
+    this.refreshPaths = function(state) {
         var ma = Bar.displayBars().map(bar => bar.getMACoord("ma30")).filter(o => !_.isNil(o));
         state.paths = [{ points: ma, style: { stroke: '#c00', strokeWidth: '2', fill: 'none' } }];
+    }
+    this.refreshTexts = function(state) {
+        if (!Bar.displayBars().length) return;
+        var text = moment(Bar.displayBars()[0].datetime).format("YYYY-MM-DD HH:mm:ss");
+        state.texts = [{ x: 10, y: 30, text: text, style: { stroke: "#0f0", fill: "#0f0", fontSize: "30" } }];
+    }
+    this.refresh = function() {
+        Bar.adjustWindow();
+        Bar.updateWindow();
+        var state = {};
+        this.refreshRects(state);
+        this.refreshLines(state);
+        this.refreshPaths(state);
+        this.refreshTexts(state);
         this.setState(state);
     }
     this.setDate = function(date) {

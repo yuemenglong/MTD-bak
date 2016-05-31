@@ -14,7 +14,9 @@ var addsrc = require('gulp-add-src');
 var less = require("gulp-less");
 var concatCss = require("gulp-concat-css");
 
-var exclude = ["react", "react-dom", "lodash", "bluebird", "whatwg-fetch"];
+var exclude = ["react", "react-dom", "lodash", "bluebird",
+    "whatwg-fetch", "moment"
+];
 
 gulp.task('src', ["pre-clean", "server", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
@@ -64,7 +66,7 @@ gulp.task('post-clean', ["build", "pack"], function() {
 });
 
 
-gulp.task('watch', function() {
+gulp.task('watch', ["default"], function() {
     gulp.watch("src/**/*.js", ["src"]);
     gulp.watch("src/**/*.jsx", ["src"]);
     gulp.watch("src/**/*.less", ["less"]);
