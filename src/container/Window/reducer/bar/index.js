@@ -1,5 +1,5 @@
 var _ = require("lodash");
-var updateMA = require("./ma");
+var MA = require("./ma");
 
 var originBars = [];
 
@@ -121,7 +121,7 @@ Bar.updateBars = function() {
         originBars[i].y1 = Math.min(originBars[i].open, originBars[i].close);
         originBars[i].y2 = Math.max(originBars[i].open, originBars[i].close);
     }
-    updateMA(originBars);
+    MA(originBars);
 }
 
 Bar.prototype.getRectCoord = function() {

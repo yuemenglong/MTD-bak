@@ -1,4 +1,4 @@
-function updateMA(bars, n, name) {
+function MA(bars, n, name) {
     n = n || 30;
     name = name || "ma" + n;
     var total = 0;
@@ -13,4 +13,4 @@ function updateMA(bars, n, name) {
     }
 }
 
-module.exports = updateMA;
+module.exports = MA;

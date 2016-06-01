@@ -1,6 +1,6 @@
-var Bar = require("./bar");
+var reducer = require("./reducer");
 var _ = require("lodash");
-var fetch = require("whatwg-fetch");
+var fetch = require("isomorphic-fetch");
 var React = require("react");
 var ReactDOM = require("react-dom");
 var Redux = require("redux");
@@ -15,30 +15,7 @@ var Svg = require("./Svg");
 
 var GRID_WIDTH = 32;
 
-function reducer(state, action) {
-    state = state || { gridWidth: 32, style: { width: 1280, height: 640, backgroundColor: "#888", }, displayBars: [] };
-    Bar.setWindowSize(state.style.width, state.style.height);
-    switch (action.type) {
-        case "FETCH_DATA":
-            console.log("FETCH_DATA");
-            return state;
-        case "FETCH_DATA_SUCC":
-            console.log("FETCH_DATA_SUCC");
-            Bar.push(action.data);
-            Bar.updateBars();
-            Bar.setWindowPos(Bar.originBars().slice(-1)[0].x1);
-            Bar.adjustWindow();
-            Bar.updateWindow();
-            return Object.assign({}, state, { displayBars: Bar.displayBars() });
-        case "FETCH_DATA_FAIL":
-            console.log("FETCH_DATA_FAIL");
-            return state;
-        default:
-            return state;
-    }
-}
-
-var store = applyMiddleware(thunk)(createStore)(reducer, typeof window !== "undefined" ? window.__INITIAL_STATE__ : undefined);
+var store = applyMiddleware(thunk)(createStore)(reducer, typeof window !== "undefined" && window.__INITIAL_STATE__ ? window.__INITIAL_STATE__ : undefined);
 
 function WindowClass() {
     if (typeof $ !== "undefined") {

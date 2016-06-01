@@ -1,5 +1,3 @@
-var Bar = require("./bar");
-var alg = require("./alg");
 var _ = require("lodash");
 var React = require("react");
 var ReactDOM = require("react-dom");
@@ -11,6 +9,19 @@ var Provider = ReactRedux.Provider;
 
 var Svg = require("../../component/Svg");
 
+function getGridLines(gridWidth, gridHeight, windowWidth, windowHeight) {
+    var ret = [];
+    var style = { strokeDasharray: "3 3", stroke: "#FFF", strokeWidth: 0.5 };
+    //horizen
+    for (var i = 0; i < windowHeight; i += gridHeight) {
+        ret.push({ x1: 0, y1: i, x2: windowWidth, y2: i, style: style });
+    }
+    for (var i = 0; i < windowWidth; i += gridWidth) {
+        ret.push({ x1: i, y1: 0, x2: i, y2: windowHeight, style: style });
+    }
+    return ret;
+}
+
 function setRects(props, state) {
     props.rects = state.displayBars.map(bar => bar.getRectCoord());
 }
@@ -18,7 +29,7 @@ function setRects(props, state) {
 function setLines(props, state) {
     var upperLines = state.displayBars.map(bar => bar.getUpperLineCoord());
     var underLines = state.displayBars.map(bar => bar.getUnderLineCoord());
-    var gridLines = alg.getGridLines(state.gridWidth, state.gridWidth, state.style.width, state.style.height);
+    var gridLines = getGridLines(state.gridWidth, state.gridWidth, state.style.width, state.style.height);
     props.lines = [].concat(upperLines).concat(underLines).concat(gridLines);
 }
 

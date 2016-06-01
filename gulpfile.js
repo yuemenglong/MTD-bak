@@ -15,7 +15,7 @@ var less = require("gulp-less");
 var concatCss = require("gulp-concat-css");
 
 var exclude = ["react", "react-dom", "lodash", "bluebird",
-    "whatwg-fetch", "moment", "redux", "react-redux", "events",
+    "isomorphic-fetch", "moment", "redux", "react-redux", "events",
 ];
 // var exclude = ["React", "ReactDOM", "Redux", "ReactRedux",
 //     "_", "Promise", "fetch", "moment", "EventEmitter"
