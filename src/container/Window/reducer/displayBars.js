@@ -1,5 +1,5 @@
-var Window = require("..");
-var Bar = require("./bar");
+var Bar = require("../busi/bar");
+var Window = require("../busi/window");
 var Redux = require("redux");
 var combineReducers = Redux.combineReducers;
 
@@ -15,26 +15,29 @@ function reducer(state, action) {
         case "FETCH_DATA_SUCC":
             console.log("FETCH_DATA_SUCC");
             Bar.push(action.data);
-            Bar.updateBars();
-            Bar.setWindowPos(Bar.originBars().slice(-1)[0].x1);
-            Bar.adjustWindow();
-            Bar.updateWindow();
+            Bar.updateOrigin();
+            Window.setPos(Bar.originBars().slice(-1)[0].x1);
+            Window.adjust();
+            Bar.updateDisplay();
+            Window.update();
             return Bar.displayBars()
         case "FETCH_DATA_FAIL":
             console.log("FETCH_DATA_FAIL");
             return state;
         case "MOVE_PREV":
-            var pos = Bar.window().x1 + (Bar.GAP + Bar.WIDTH);
-            Bar.setWindowPos(pos);
-            Bar.adjustWindow();
-            Bar.updateWindow();
+            var pos = Window.x1() + (Bar.GAP + Bar.WIDTH);
+            Window.setPos(pos);
+            Window.adjust();
+            Bar.updateDisplay();
+            Window.update();
             return Bar.displayBars()
         case "MOVE_NEXT":
-            var pos = Bar.window().x1 - (Bar.GAP + Bar.WIDTH);
+            var pos = Window.x1() - (Bar.GAP + Bar.WIDTH);
             pos = pos >= 0 ? pos : 0;
-            Bar.setWindowPos(pos);
-            Bar.adjustWindow();
-            Bar.updateWindow();
+            Window.setPos(pos);
+            Window.adjust();
+            Bar.updateDisplay();
+            Window.update();
             return Bar.displayBars()
         default:
             return state;
