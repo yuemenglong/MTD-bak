@@ -24,6 +24,12 @@ function WINDOW() {
     this.height = function() {
         return Window.height;
     }
+    this.startTime = function() {
+        return _.nth(Bar.displayBars(), -1).datetime;
+    }
+    this.endTime = function() {
+        return _.nth(Bar.displayBars(), 0).datetime;
+    }
     this.getX = function(x) {
         return Window.x2 - x;
     }
@@ -60,4 +66,3 @@ function WINDOW() {
         Window.y2 = high.high;
     }
 }
-

@@ -10,10 +10,8 @@ function reducer(state, action) {
     // Bar.setWindowSize(state.style.width, state.style.height);
     switch (action.type) {
         case "FETCH_DATA":
-            console.log("FETCH_DATA");
             return state;
         case "FETCH_DATA_SUCC":
-            console.log("FETCH_DATA_SUCC");
             Bar.push(action.data);
             Bar.updateOrigin();
             Window.setPos(Bar.originBars().slice(-1)[0].x1);
@@ -22,7 +20,6 @@ function reducer(state, action) {
             Window.update();
             return Bar.displayBars()
         case "FETCH_DATA_FAIL":
-            console.log("FETCH_DATA_FAIL");
             return state;
         case "MOVE_PREV":
             var pos = Window.x1() + (Bar.GAP + Bar.WIDTH);

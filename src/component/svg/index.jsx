@@ -4,13 +4,13 @@ var ReactDOM = require("react-dom");
 //{lines, rects, paths, texts}
 var SvgClass = function() {
     this.renderLine = function(o) {
-        var key = `${o.x1}${o.y1}${o.x2}${o.y2}`;
+        var key = `${o.x1}${o.y1}${o.x2}${o.y2}${o.style.stroke}`;
         var style = o.style;
         var item = { x1: o.x1, y1: o.y1, x2: o.x2, y2: o.y2, key: key, style: style };
         return jade("line({...item})");
     }
     this.renderRect = function(o) {
-        var key = `${o.x1}${o.y1}${o.x2}${o.y2}`;
+        var key = `${o.x1}${o.y1}${o.x2}${o.y2}${o.style.stroke}`;
         var x = Math.min(o.x1, o.x2);
         var y = Math.min(o.y1, o.y2);
         var width = Math.max(o.x1, o.x2) - x;

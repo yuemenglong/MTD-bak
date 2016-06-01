@@ -30,7 +30,8 @@ function setLines(props, state) {
     var upperLines = state.displayBars.map(bar => bar.getUpperLineCoord());
     var underLines = state.displayBars.map(bar => bar.getUnderLineCoord());
     var gridLines = getGridLines(state.init.gridWidth, state.init.gridWidth, state.init.style.width, state.init.style.height);
-    props.lines = [].concat(upperLines).concat(underLines).concat(gridLines);
+    var orderLines = _.flatten(state.displayOrders.map(order => order.getLinesCoord()));
+    props.lines = [].concat(upperLines).concat(underLines).concat(gridLines).concat(orderLines);
 }
 
 function setPaths(props, state) {
@@ -46,7 +47,6 @@ function setTexts(props, state) {
 
 function mapStateToProps(state) {
     var props = { style: state.init.style };
-    var displayBars = state.displayBars;
     setRects(props, state);
     setLines(props, state);
     setPaths(props, state);
