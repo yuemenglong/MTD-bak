@@ -31,9 +31,9 @@ gulp.task('pre-clean', function() {
 gulp.task("server", ["pre-clean"], function() {
     return gulp.src("src/**/*.jsx")
         .pipe(jadeToJsx())
+        .pipe(addsrc(["src/**/*.js"]))
         .pipe(babel({ presets: ['react', 'es2015'] }))
         .pipe(rename({ extname: ".js" }))
-        .pipe(addsrc(["src/**/*.js"]))
         .pipe(gulp.dest("server"));
 })
 

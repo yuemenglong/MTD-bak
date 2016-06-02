@@ -3,6 +3,7 @@ var Window = require("../busi/window");
 var Order = require("../busi/order");
 var Redux = require("redux");
 var combineReducers = Redux.combineReducers;
+var store = require("../store");
 var Action = require("../action");
 
 module.exports = reducer;
@@ -11,14 +12,8 @@ function reducer(state, action) {
     state = state || [];
     switch (action.type) {
         case "SEND_ORDER_SUCC":
-            Order.updateDisplay();
-            return Order.displayOrders();
-        case "MOVE_NEXT":
-            Order.updateDisplay();
-            return Order.displayOrders();
-        case "MOVE_NEXT":
-            Order.updateDisplay();
-            return Order.displayOrders();
+            Order.push(action.order);
+            return Order.originOrders();
         default:
             return state;
     }

@@ -4,13 +4,13 @@ var ReactDOM = require("react-dom");
 //{lines, rects, paths, texts}
 var SvgClass = function() {
     this.renderLine = function(o) {
-        var key = `${o.x1}${o.y1}${o.x2}${o.y2}${o.style.stroke}`;
+        var key = o.key || `${o.x1}${o.y1}${o.x2}${o.y2}${o.style.stroke}`;
         var style = o.style;
         var item = { x1: o.x1, y1: o.y1, x2: o.x2, y2: o.y2, key: key, style: style };
         return jade("line({...item})");
     }
     this.renderRect = function(o) {
-        var key = `${o.x1}${o.y1}${o.x2}${o.y2}${o.style.stroke}`;
+        var key = o.key || `${o.x1}${o.y1}${o.x2}${o.y2}${o.style.stroke}`;
         var x = Math.min(o.x1, o.x2);
         var y = Math.min(o.y1, o.y2);
         var width = Math.max(o.x1, o.x2) - x;
@@ -27,13 +27,13 @@ var SvgClass = function() {
             res.push(`L ${item.x} ${item.y}`)
             return res;
         }, [`M ${points[0].x} ${points[0].y}`]).join(" ");
-        var key = path;
+        var key = o.key || path;
         var item = { d: path, key: key, style: style };
         return jade("path({...item})");
     };
     //{x,y,text,style}
     this.renderText = function(o) {
-        var key = `${o.x}-${o.y}`;
+        var key = o.key || `${o.x}-${o.y}`;
         var item = { x: o.x, y: o.y, key: key, style: o.style };
         return jade("text({...item}) {o.text}");
     };

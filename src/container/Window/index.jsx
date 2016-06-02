@@ -1,35 +1,31 @@
-var reducer = require("./reducer");
 var _ = require("lodash");
 var fetch = require("isomorphic-fetch");
 var React = require("react");
-var ReactDOM = require("react-dom");
-var Redux = require("redux");
-var thunk = require("redux-thunk").default;
 var ReactRedux = require("react-redux");
-var connect = ReactRedux.connect;
 var Provider = ReactRedux.Provider;
-var createStore = Redux.createStore;
-var applyMiddleware = Redux.applyMiddleware;
 
 var Bar = require("./busi/bar");
 var Order = require("./busi/order");
+var action = require("./action");
 
 var Svg = require("./Svg");
+var OrderTable = require("./OrderTable");
 
-var store = applyMiddleware(thunk)(createStore)(reducer, typeof window !== "undefined" && window.__INITIAL_STATE__ ? window.__INITIAL_STATE__ : undefined);
+var store = require("./store");
 
 function WindowClass() {
     if (typeof $ !== "undefined") {
+        $.ajaxSetup({ contentType: "application/json; charset=utf-8" });
         $(document).keydown(function(e) {
             console.log(e.keyCode);
             if (e.keyCode === 39) {
                 store.dispatch({ type: "MOVE_NEXT" });
             } else if (e.keyCode === 37) {
                 store.dispatch({ type: "MOVE_PREV" });
-            } else if (e.keyCode === 38) {
+            } else if (e.keyCode === 66) {
                 var bar = Bar.displayBars()[0];
-                var order = new Order("BUY", bar.close, 0.2);
-                store.dispatch({ type: "ORDER_SEND", order: order });
+                var order = { type: "BUY", price: bar.close, volumn: 0.2 };
+                store.dispatch(action.sendOrder(order));
             }
         })
         $(document).ready(function() {
@@ -46,9 +42,11 @@ function WindowClass() {
     this.render = function() {
         return jade(`
             Provider(store={store})
-                Svg`);
+                div
+                    Svg
+                    OrderTable`);
     }
 }
 
 module.exports = React.createClass(new WindowClass());
-module.exports.state = store.getState();
+module.exports.store = store;
