@@ -52,7 +52,7 @@ gulp.task('pack', ["build"], function() {
     // var b = browserify("build/bundle.js");
     // exclude.map(o => b.external(o));
     // return b.bundle()
-    return browserify('build/bundle.js')
+    return browserify('build/container/Window/bundle.js')
         .bundle()
         .pipe(source('bundle.js'))
         .pipe(buffer())
