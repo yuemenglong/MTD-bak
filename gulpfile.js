@@ -1,3 +1,4 @@
+var fs = require("fs");
 var gulp = require('gulp');
 var jadeToJsx = require("gulp-jade-jsx");
 
@@ -13,6 +14,7 @@ var replace = require("gulp-replace");
 var addsrc = require('gulp-add-src');
 var less = require("gulp-less");
 var concatCss = require("gulp-concat-css");
+var merge = require('merge-stream');
 
 var exclude = ["react", "react-dom", "lodash", "bluebird",
     "isomorphic-fetch", "moment", "redux", "react-redux", "events",
@@ -42,10 +44,16 @@ gulp.task("render", ["pre-clean"], function() {
 gulp.task('build', ["render"], function() {
     var excludePattern = "(" + exclude.join(")|(") + ")";
     var pattern = `^.*require\\((["'])(${excludePattern})\\1\\).*$`;
-    return gulp.src("render/**/*.js")
+    var excludeTask = gulp.src("render/**/*.js")
         // .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
         .pipe(replace(new RegExp(pattern, "gm"), ""))
         .pipe(gulp.dest("build"));
+    var names = fs.readdirSync("build/app");
+    var copyTasks = names.map(function(name) {
+        return gulp.src("render/app/bundle.js")
+            .pipe(gulp.dest(`render/app/${name}`));
+    })
+    return merge([excludeTask].concat(copyTasks));
 });
 
 //pack js
@@ -53,11 +61,15 @@ gulp.task('pack', ["build"], function() {
     // var b = browserify("build/bundle.js");
     // exclude.map(o => b.external(o));
     // return b.bundle()
-    return browserify('build/bundle.js')
-        .bundle()
-        .pipe(source('bundle.js'))
-        .pipe(buffer())
-        .pipe(gulp.dest(bundlePath));
+    var names = fs.readdirSync("build/app");
+    var tasks = names.map(function(name) {
+        return browserify('build/bundle.js')
+            .bundle()
+            .pipe(source('bundle.js'))
+            .pipe(buffer())
+            .pipe(gulp.dest(bundlePath));
+    })
+
 });
 
 gulp.task("less", function() {
