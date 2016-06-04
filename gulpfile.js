@@ -17,31 +17,32 @@ var concatCss = require("gulp-concat-css");
 var exclude = ["react", "react-dom", "lodash", "bluebird",
     "isomorphic-fetch", "moment", "redux", "react-redux", "events",
 ];
-// var exclude = ["React", "ReactDOM", "Redux", "ReactRedux",
-//     "_", "Promise", "fetch", "moment", "EventEmitter"
-// ];
 
-gulp.task('src', ["pre-clean", "server", "build", "pack", "post-clean"]);
+var bundlePath = "bundle"
+
+gulp.task('src', ["pre-clean", "render", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
 
 gulp.task('pre-clean', function() {
-    return gulp.src("server").pipe(path(del));
+    return gulp.src("render")
+        .pipe(addsrc(bundlePath))
+        .pipe(path(del));
 });
 
-gulp.task("server", ["pre-clean"], function() {
+gulp.task("render", ["pre-clean"], function() {
     return gulp.src("src/**/*.jsx")
         .pipe(jadeToJsx())
         .pipe(addsrc(["src/**/*.js"]))
         .pipe(babel({ presets: ['react', 'es2015'] }))
         .pipe(rename({ extname: ".js" }))
-        .pipe(gulp.dest("server"));
+        .pipe(gulp.dest("render"));
 })
 
 //trans jsx => js
-gulp.task('build', ["server"], function() {
+gulp.task('build', ["render"], function() {
     var excludePattern = "(" + exclude.join(")|(") + ")";
     var pattern = `^.*require\\((["'])(${excludePattern})\\1\\).*$`;
-    return gulp.src("server/**/*.js")
+    return gulp.src("render/**/*.js")
         // .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
         .pipe(replace(new RegExp(pattern, "gm"), ""))
         .pipe(gulp.dest("build"));
@@ -56,14 +57,14 @@ gulp.task('pack', ["build"], function() {
         .bundle()
         .pipe(source('bundle.js'))
         .pipe(buffer())
-        .pipe(gulp.dest('bundle'));
+        .pipe(gulp.dest(bundlePath));
 });
 
 gulp.task("less", function() {
     return gulp.src("src/**/*.less")
         .pipe(less())
         .pipe(concatCss("bundle.css"))
-        .pipe(gulp.dest("bundle"));
+        .pipe(gulp.dest(bundlePath));
 })
 
 //del js which transformed from jsx
