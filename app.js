@@ -4,7 +4,7 @@ var fs = require("fs");
 var bodyParser = require("body-parser");
 var param = require("./render");
 var uuid = require("node-uuid");
-var orderService = require("web/service/order");
+var orderService = require("./web/service/order");
 
 var app = express();
 app.use(bodyParser.json())
