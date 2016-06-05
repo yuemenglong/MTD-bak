@@ -1,7 +1,7 @@
 var _ = require("lodash");
 var Bar = require("./bar");
 var Window = require("./window");
-var uuid = require('node-uuid');
+// var uuid = require('node-uuid');
 
 module.exports = Order;
 

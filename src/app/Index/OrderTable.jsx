@@ -41,9 +41,9 @@ var OrderTable = React.createClass(new OrderTableClass());
 module.exports = connect(mapStateToProps)(OrderTable);
 
 if (require.main == module) {
-    var orders = [{ id: 1, price: 10, volumn: 0.2, createTime: new Date().toLocaleString(), type: "BUY" }];
-    var server = require("react-dom/server");
-    var app = jade("OrderTable(orders={orders})");
-    var html = server.renderToStaticMarkup(app);
-    console.log(html);
+    // var orders = [{ id: 1, price: 10, volumn: 0.2, createTime: new Date().toLocaleString(), type: "BUY" }];
+    // var server = require("react-dom/server");
+    // var app = jade("OrderTable(orders={orders})");
+    // var html = server.renderToStaticMarkup(app);
+    // console.log(html);
 }
