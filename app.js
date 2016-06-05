@@ -13,7 +13,7 @@ var app = express();
 app.use(bodyParser.json())
 
 app.use('/bundle', express.static(__dirname + '/bundle'));
-app.use('/data', express.static(__dirname + '/data'));
+app.use('/static', express.static(__dirname + '/static'));
 
 app.get("/", function(req, res) {
     // cleanCache("./render");

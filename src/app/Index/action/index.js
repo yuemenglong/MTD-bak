@@ -1,4 +1,5 @@
 var Order = require("../busi/order");
+var fetch = require("isomorphic-fetch");
 
 var Action = {};
 
@@ -10,8 +11,16 @@ Action.sendOrder = function(order) {
         });
     }
 };
-Action.SEND_ORDER_SUCC = "SEND_ORDER_SUCC";
-Action.REFRESH_DISPLAY_ORDERS = "REFRESH_DISPLAY_ORDERS";
 
+Action.fetchData = function() {
+    return function(dispatch, getState) {
+        dispatch({ type: "FETCH_DATA" });
+        fetch("/static/data/2001.json").then(function(res) {
+            return res.json();
+        }).then(function(json) {
+            dispatch({ type: "FETCH_DATA_SUCC", data: json });
+        })
+    };
+}
 
 module.exports = Action;
