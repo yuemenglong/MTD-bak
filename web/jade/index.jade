@@ -5,7 +5,6 @@ html
 		script(src="//cdn.bootcss.com/react/0.14.7/react-dom.js")
 		script(src="//cdn.bootcss.com/redux/3.5.2/redux.js")
 		script(src="//cdn.bootcss.com/react-redux/4.4.5/react-redux.js")
-		script(scr="//cdn.bootcss.com/redux-thunk/2.1.0/redux-thunk.js")
 		script(src="//cdn.bootcss.com/lodash.js/4.12.0/lodash.min.js")
 		script(src="//cdn.bootcss.com/bluebird/3.3.5/bluebird.min.js")
 		script(src="//cdn.bootcss.com/jquery/2.2.3/jquery.min.js")
@@ -14,7 +13,7 @@ html
 		script(src="//cdn.bootcss.com/EventEmitter/5.0.0/EventEmitter.min.js")
 		link(rel="stylesheet" href="bundle/bundle.css")
 		script.
-			window.__INITIAL_STATE__ = !{init}
+			window.__INITIAL_STATE__ = (function(){return !{init}})();
 	body 
 		#container !{html}
-		script(src="/bundle/bundle.js")
+		script(src="/bundle/Index/bundle.js")

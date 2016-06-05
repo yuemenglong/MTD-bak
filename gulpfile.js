@@ -18,25 +18,16 @@ var merge = require('merge-stream');
 
 var through = require('through2');
 
-var exclude = ["react", "react-dom", "redux", "react-redux", "redux-thunk",
+var exclude = ["react", "react-dom", "redux", "react-redux", 
     "lodash", "bluebird", "moment",
     "isomorphic-fetch", "events",
 ];
 
-
 gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
 
-gulp.task('test', function() {
-    return gulp.src(["build"])
-        // .pipe(addsrc("bundle"))
-        .pipe(path(del))
-        .pipe(gulp.src("bundle"))
-        .pipe(path(del));
-});
-
 gulp.task('pre-clean', function() {
-    return gulp.src(["temp", "build", "bundle"])
+    return gulp.src(["temp", "build"])
         .pipe(path(del));
 });
 

@@ -4,7 +4,7 @@ var fs = require("fs");
 var bodyParser = require("body-parser");
 var uuid = require("node-uuid");
 
-var Window = require("./build/app/Window");
+var Index = require("./build/app/Index");
 var orderService = require("./web/service/order");
 
 var serverRender = require("./web/server-render");

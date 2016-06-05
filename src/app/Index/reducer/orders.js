@@ -3,7 +3,6 @@ var Window = require("../busi/window");
 var Order = require("../busi/order");
 var Redux = require("redux");
 var combineReducers = Redux.combineReducers;
-var store = require("../store");
 var Action = require("../action");
 
 module.exports = reducer;
