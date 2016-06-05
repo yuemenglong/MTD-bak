@@ -95,22 +95,6 @@ gulp.task('pack', ["pack-dispatch"], function() {
     return merge(packTasks);
 });
 
-//pack js
-// gulp.task('pack', ["build"], function() {
-//     // var b = browserify("build/bundle.js");
-//     // exclude.map(o => b.external(o));
-//     // return b.bundle()
-//     var names = fs.readdirSync("build/app");
-//     var tasks = names.map(function(name) {
-//         return browserify('build/bundle.js')
-//             .bundle()
-//             .pipe(source('bundle.js'))
-//             .pipe(buffer())
-//             .pipe(gulp.dest("bundle"));
-//     })
-
-// });
-
 gulp.task('post-clean', ["pack"], function() {
     return gulp.src("temp").pipe(path(del));
 });
