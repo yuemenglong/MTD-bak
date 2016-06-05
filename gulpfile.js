@@ -57,7 +57,7 @@ gulp.task('pack-dispatch', ["pack-exclude"], function() {
     });
     var dispatchTasks = names.map(function(name) {
         var path = `temp/app/${name}`;
-        return gulp.src("temp/app/bundle.js")
+        return gulp.src("temp/bundle.js")
             .pipe(gulp.dest(`temp/app/${name}`));
     })
     return merge(dispatchTasks);
