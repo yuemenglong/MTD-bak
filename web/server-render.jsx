@@ -15,7 +15,7 @@ Provider(store={store})
 
 function serverRender(App, state) {
     state = state || {};
-    var reducer = App.reducer;
+    var reducer = App.reducer || function() {};
     var store = createStoreWithMiddleware(reducer, state);
     var app = jade(tpl);
     var html = server.renderToStaticMarkup(app);

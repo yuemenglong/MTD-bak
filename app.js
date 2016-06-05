@@ -4,7 +4,6 @@ var fs = require("fs");
 var bodyParser = require("body-parser");
 var uuid = require("node-uuid");
 
-var Index = require("./build/app/Index");
 var orderService = require("./web/service/order");
 
 var serverRender = require("./web/server-render");
@@ -16,8 +15,13 @@ app.use('/bundle', express.static(__dirname + '/bundle'));
 app.use('/static', express.static(__dirname + '/static'));
 
 app.get("/", function(req, res) {
-    // cleanCache("./render");
     var tpl = fs.readFileSync(__dirname + "/web/jade/index.jade");
+    var html = jade.compile(tpl)();
+    res.end(html);
+})
+
+app.get("/todo", function(req, res) {
+    var tpl = fs.readFileSync(__dirname + "/web/jade/todo.jade");
     var html = jade.compile(tpl)();
     res.end(html);
 })

@@ -18,7 +18,7 @@ var merge = require('merge-stream');
 
 var through = require('through2');
 
-var exclude = ["react", "react-dom", "redux", "react-redux", 
+var exclude = ["react", "react-dom", "redux", "react-redux",
     "lodash", "bluebird", "moment",
     "isomorphic-fetch", "events",
 ];
@@ -95,6 +95,14 @@ gulp.task("less", function() {
         .pipe(less())
         .pipe(concatCss("bundle.css"))
         .pipe(gulp.dest("bundle"));
+})
+
+gulp.task("server-render", function() {
+    return gulp.src("web/server-render.jsx")
+        .pipe(jadeToJsx())
+        .pipe(babel({ presets: ['react'] }))
+        .pipe(rename({ extname: ".js" }))
+        .pipe(gulp.dest("web/"));
 })
 
 gulp.task('watch', ["default"], function() {

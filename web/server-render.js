@@ -1,17 +1,19 @@
 'use strict';
 
-var jade = require('jade');
-var fs = require('fs');
 var server = require('react-dom/server');
 var React = require('react');
-var ReactRedux = require('react-redux');
 var Redux = require('redux');
+var ReactRedux = require('react-redux');
+var thunk = require('redux-thunk').default;
+var createStore = Redux.createStore;
+var applyMiddleware = Redux.applyMiddleware;
 var Provider = ReactRedux.Provider;
+var createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
 
 function serverRender(App, state) {
     state = state || {};
-    var reducer = App.reducer;
-    var store = Redux.createStore(reducer, state);
+    var reducer = App.reducer || function () {};
+    var store = createStoreWithMiddleware(reducer, state);
     var app = React.createElement(
         Provider,
         { store: store },
@@ -25,4 +27,3 @@ function serverRender(App, state) {
     };
 }
 module.exports = serverRender;
-

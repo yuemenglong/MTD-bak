@@ -15,7 +15,7 @@ Provider(store={store})
 
 var App = require(".");
 
-var reducer = App.reducer;
+var reducer = App.reducer || function() {};
 var store = createStoreWithMiddleware(reducer, window.__INITIAL_STATE__);
 var app = jade(tpl);
 
