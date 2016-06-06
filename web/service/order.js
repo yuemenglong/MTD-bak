@@ -1,6 +1,7 @@
 var _ = require("lodash");
 var orm = require("yy-orm");
 var uuid = require("node-uuid");
+var moment = require("moment");
 var type = orm.type;
 var cond = orm.cond;
 var db = orm.create({ host: 'localhost', user: 'root', password: 'root', database: 'test' })
@@ -27,11 +28,26 @@ var service = {};
 
 service.sendOrder = function(order) {
     order.id = uuid.v1();
+    order.createTime = new Date();
+    order.status = "CREATE";
     if (order.type === "BUY" || order.type === "SELL") {
         order.openTime = order.createTime;
         order.openPrice = order.price;
+        order.status = "OPEN";
     }
     return Order.insert(order);
+}
+
+service.updateOrder = function(order) {
+    return Order.update(order);
+}
+
+service.listOrder = function() {
+    return Order.select().then((orders) => orders.map(transDate));
+}
+
+function transDate(obj) {
+    return _.mapValues(obj, o => _.isDate(o) ? moment(o).format("YYYY-MM-DD HH:mm:ss") : o);
 }
 
 module.exports = service;

@@ -11,9 +11,10 @@ html
 		script(src="//cdn.bootcss.com/fetch/1.0.0/fetch.min.js")
 		script(src="//cdn.bootcss.com/moment.js/2.13.0/moment.min.js")
 		script(src="//cdn.bootcss.com/EventEmitter/5.0.0/EventEmitter.min.js")
+		link(rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css")
 		link(rel="stylesheet" href="bundle/bundle.css")
 		script.
 			window.__INITIAL_STATE__ = (function(){return !{init}})();
 	body 
-		#container !{html}
+		.container#container !{html}
 		script(src="/bundle/Index/bundle.js")

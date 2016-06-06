@@ -8,7 +8,7 @@ function OrderTableClass() {
         var header = ["id", "type", "price", "volumn", "stopLoss", "stopWin", "createTime", "openTime", "closeTime"];
         var that = this;
         return jade(`
-			table
+			table(className="table")
 				thead
 					tr #{}
 				tbody #{}`,
