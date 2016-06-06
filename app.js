@@ -17,11 +17,8 @@ app.use('/static', express.static(__dirname + '/static'));
 
 app.get("/", function(req, res) {
     var tpl = fs.readFileSync(__dirname + "/web/jade/index.jade");
-    Promise.try(() => orderService.listOrder())
-        .then((orders) => {
-            var html = jade.compile(tpl)(serverRender(Index, { orders: orders }));
-            res.end(html);
-        })
+    var html = jade.compile(tpl)();
+    res.end(html);
 })
 
 app.post("/order", function(req, res) {

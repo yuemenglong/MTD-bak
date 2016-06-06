@@ -10,6 +10,9 @@ module.exports = reducer;
 function reducer(state, action) {
     state = state || [];
     switch (action.type) {
+        case "FETCH_ORDER_SUCC":
+            Order.push(action.orders);
+            return Order.originOrders();
         case "SEND_ORDER_SUCC":
             Order.push(action.order);
             return Order.originOrders();

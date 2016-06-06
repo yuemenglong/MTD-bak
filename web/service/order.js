@@ -28,13 +28,6 @@ var service = {};
 
 service.sendOrder = function(order) {
     order.id = uuid.v1();
-    order.createTime = new Date();
-    order.status = "CREATE";
-    if (order.type === "BUY" || order.type === "SELL") {
-        order.openTime = order.createTime;
-        order.openPrice = order.price;
-        order.status = "OPEN";
-    }
     return Order.insert(order);
 }
 

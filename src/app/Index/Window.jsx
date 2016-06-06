@@ -23,12 +23,21 @@ function WindowClass() {
                 dispatch({ type: "MOVE_PREV" });
             } else if (e.keyCode === 66) {
                 var bar = Bar.displayBars()[0];
-                var order = { type: "BUY", price: bar.close, volumn: 0.2 };
+                var order = new Order({
+                    type: "BUY",
+                    price: bar.close,
+                    volumn: 0.2,
+                    createTime: bar.datetime,
+                    openPrice: bar.close,
+                    openTime: bar.datetime,
+                    status: "OPEN",
+                });
                 dispatch(Action.sendOrder(order));
             }
         })
         $(document).ready(function() {
             dispatch(Action.fetchData());
+            dispatch(Action.fetchOrder());
         })
     }
     this.render = function() {

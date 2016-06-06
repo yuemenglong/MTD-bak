@@ -8,21 +8,21 @@ module.exports = Order;
 var originOrders = [];
 var displayOrders = [];
 
-function Order({ id, type, price, volumn, stopLoss, stopWin }) {
-    this.id = id;
-    this.type = type;
-    this.price = price;
-    this.volumn = volumn;
-    this.stopLoss = stopLoss;
-    this.stopWin = stopWin;
-    this.createTime = Window.endTime();
-    if (type === "BUY" || type === "SELL") {
-        this.openTime = this.createTime;
-    }
+function Order(order) {
+    _.merge(this, order)
+    var times = ["createTime", "openTime", "closeTime"];
+    _.forEach(times, function(field) {
+        this[field] = this[field] && new Date(this[field]);
+    }.bind(this))
+}
+
+Order.prototype.toJSON = function() {
+    var order = _.mapValues(this, o => _.isDate(o) ? moment(o).format("YYYY-MM-DD HH:mm:ss") : o);
+    return order;
 }
 
 Order.push = function(order) {
-    originOrders.push(order);
+    originOrders = originOrders.concat(_.flatten([order]));
 }
 
 Order.get = function(id) {
