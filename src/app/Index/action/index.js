@@ -26,6 +26,15 @@ Action.sendOrder = function(order) {
     }
 };
 
+Action.updateOrder = function(order) {
+    return function(dispatch, getState) {
+        var json = JSON.stringify(order);
+        $.post("/order/" + order.id, json, function(res) {
+            dispatch({ type: "UPDATE_ORDER_SUCC", order: new Order(res) });
+        });
+    }
+}
+
 Action.fetchData = function() {
     return function(dispatch, getState) {
         dispatch({ type: "FETCH_DATA" });

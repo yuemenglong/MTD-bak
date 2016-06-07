@@ -4,6 +4,7 @@ var Order = require("../busi/order");
 var Redux = require("redux");
 var combineReducers = Redux.combineReducers;
 var Action = require("../action");
+// var Immutable = require('immutable');
 
 module.exports = reducer;
 
@@ -15,6 +16,9 @@ function reducer(state, action) {
             return Order.originOrders();
         case "SEND_ORDER_SUCC":
             Order.push(action.order);
+            return Order.originOrders();
+        case "UPDATE_ORDER_SUCC":
+            Order.update(action.order);
             return Order.originOrders();
         default:
             return state;

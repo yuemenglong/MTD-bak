@@ -12,6 +12,7 @@
     "bluebird": "^3.3.5",
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
+    "immutable": "^3.8.1",
     "isomorphic-fetch": "^2.2.1",
     "jade": "^1.11.0",
     "lodash": "^4.13.1",

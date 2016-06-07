@@ -10,7 +10,7 @@ var Index = require("./build/app/Index");
 var serverRender = require("./web/server-render");
 
 var app = express();
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 app.use('/bundle', express.static(__dirname + '/bundle'));
 app.use('/static', express.static(__dirname + '/static'));
@@ -30,7 +30,7 @@ app.post("/order", function(req, res) {
 app.post("/order/:id", function(req, res) {
     var order = req.body;
     Promise.try(() => orderService.updateOrder(order))
-        .then((order) => res.json(order));
+        .then(() => res.json(order));
 })
 
 app.get("/order", function(req, res) {

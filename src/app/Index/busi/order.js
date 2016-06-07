@@ -26,7 +26,13 @@ Order.push = function(order) {
 }
 
 Order.get = function(id) {
-    return _.filter(displayOrders, o => o.id === id).nth(0);
+    return _.filter(originOrders, o => o.id === id).nth(0);
+}
+
+Order.update = function(order) {
+    _.assign(originOrders.filter(function(o) {
+        return o.id === order.id;
+    })[0], order);
 }
 
 Order.prototype.close = function() {
@@ -35,7 +41,8 @@ Order.prototype.close = function() {
 
 Order.updateDisplay = function() {
     displayOrders = _.filter(originOrders, function(order) {
-        return order.createTime <= Window.endTime();
+        return (order.status !== "CLOSE" && order.createTime <= Window.endTime()) ||
+            (order.status === "CLOSE" && order.closeTime >= Window.startTime());
     })
 }
 
@@ -53,12 +60,18 @@ Order.prototype.getLinesCoord = function(now) {
         //1. 已经成交且时间在成交时间之后
         var startBar = Bar.getBarByTime(this.openTime);
         var endBar = Bar.getBarByTime(this.closeTime);
-        //todo
+        var style = { stroke: "#00f", strokeDasharray: "5,5" }
+        var key = this.id;
+        var x1 = Window.getX(startBar.getX());
+        var x2 = Window.getX(endBar.getX());
+        var y1 = Window.getY(this.openPrice);
+        var y2 = Window.getY(this.closePrice);
+        return [{ x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style }];
     } else {
         //2. 只显示挂单和止损线
         var style = { stroke: "#0f0", strokeDasharray: "5,5" }
         var y = Window.getY(this.price);
         var key = `open-${this.id}`;
-        return [{ x1: 0, y1: y, x2: Window.width(), y2: y, style, key }];
+        return [{ x1: 0, y1: y, x2: Window.width(), y2: y, style: style, key: key }];
     }
 }

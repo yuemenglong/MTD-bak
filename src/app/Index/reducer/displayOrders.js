@@ -12,6 +12,7 @@ function reducer(state, action) {
     switch (action.type) {
         case "SEND_ORDER_SUCC":
         case "FETCH_ORDER_SUCC":
+        case "UPDATE_ORDER_SUCC":
         case "MOVE_PREV":
         case "MOVE_NEXT":
             Order.updateDisplay();

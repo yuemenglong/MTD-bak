@@ -3,22 +3,51 @@ var React = require("react");
 var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
 
+var Action = require("./action");
+var Window = require("./busi/window");
+
+// orders[] 
 function OrderTableClass() {
+    this.onCloseClick = function(id) {
+        var order = this.props.orders.filter(function(o) {
+            return o.id === id;
+        })[0];
+        if (!order) return;
+        order.closeTime = Window.endTime();
+        order.closePrice = Window.endPrice();
+        order.status = "CLOSE";
+        this.props.dispatch(Action.updateOrder(order));
+        return false;
+    }
+    this.renderOperate = function(id) {
+        return jade(`
+            td(key="op")
+                a(href="#" onClick={this.onCloseClick.bind(null, id)}) 平仓
+            `)
+    }
+    this.renderDate = function(o) {
+        if (_.isDate(o)) {
+            return o.toLocaleString();
+        } else {
+            return o;
+        }
+    }
     this.render = function() {
-        var header = ["id", "type", "price", "volumn", "stopLoss", "stopWin", "createTime", "openTime", "closeTime"];
+        var header = ["id", "type", "price", "volumn", "stopLoss", "stopWin", "status", "createTime", "openTime", "closeTime", "operate"];
         var that = this;
         return jade(`
-			table(className="table")
-				thead
-					tr #{}
-				tbody #{}`,
+            table(className="table")
+                thead
+                    tr #{}
+                tbody #{}`,
             function() {
                 return _.map(header, o => jade("th(key={o}) {o}"));
             },
             function() {
                 return _.map(that.props.orders, function(order) {
                     return jade("tr(key={order.id}) #{}", function() {
-                        return _.map(header, o => jade("td(key={o}) {order[o]}"));
+                        return _.map(header, o => jade("td(key={o}) {that.renderDate(order[o])}"))
+                            .concat([that.renderOperate(order.id)]);
                     });
                 })
             }
@@ -27,14 +56,7 @@ function OrderTableClass() {
 }
 
 function mapStateToProps(state) {
-    var orders = _.map(state.orders, function(order) {
-        var order = _.clone(order);
-        _.map(["createTime", "openTime", "closeTime"], function(o) {
-            order[o] = order[o] && order[o].toLocaleString();
-        })
-        return order;
-    })
-    return { orders: orders };
+    return { orders: state.orders };
 }
 
 var OrderTable = React.createClass(new OrderTableClass());

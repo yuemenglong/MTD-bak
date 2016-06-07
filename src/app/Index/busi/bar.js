@@ -26,6 +26,9 @@ function WINDOW() {
     this.endTime = function() {
         return _.nth(Bar.displayBars(), 0).datetime;
     }
+    this.endPrice = function() {
+        return _.nth(Bar.displayBars(), 0).close;
+    }
     this.getX = function(x) {
         return Window.x2 - x;
     }
@@ -140,6 +143,9 @@ Bar.updateDisplay = function() {
     displayBars = originBars.slice(start, end);
 }
 
+Bar.prototype.getX = function() {
+    return (this.x1 + this.x2) / 2;
+}
 
 Bar.prototype.getRectCoord = function() {
     var x1 = Window.getX(this.x1);
@@ -199,9 +205,9 @@ Bar.getBarByTime = function(datetime, from, to) {
         return originBars[mid];
     }
     if (datetime <= small) {
-        return arguments.callee(datetime, mid + 1, to);
+        return Bar.getBarByTime(datetime, mid + 1, to);
     } else {
-        return arguments.callee(datetime, from, mid);
+        return Bar.getBarByTime(datetime, from, mid);
     }
 }
 
