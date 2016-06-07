@@ -26,6 +26,30 @@ var exclude = ["react", "react-dom", "redux", "react-redux",
 gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
 
+var transform = function(file, opt) {
+    var data = "";
+    return through(transform, flush);
+
+    function transform(chunk, enc, cb) {
+        console.log("transform");
+        console.log(chunk.toString());
+        data += chunk;
+        cb();
+    }
+
+    function flush(cb) {
+        console.log("flush");
+        this.push(data);
+        cb();
+    }
+}
+
+gulp.task("test", function() {
+    var b = browserify("test.js");
+    b.transform(transform);
+    b.bundle().pipe(fs.createWriteStream("./testBundle.js"));
+})
+
 gulp.task('pre-clean', function() {
     return gulp.src(["temp", "build"])
         .pipe(path(del));
