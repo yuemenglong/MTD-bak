@@ -18,6 +18,10 @@ var merge = require('merge-stream');
 
 var through = require('through2');
 
+var requirement = require("./tool/requirement").requirement;
+var ExcludePlugin = require("./tool/requirement").ExcludePlugin;
+
+
 var exclude = ["react", "react-dom", "redux", "react-redux",
     "lodash", "bluebird", "moment",
     "isomorphic-fetch", "events",
@@ -26,28 +30,10 @@ var exclude = ["react", "react-dom", "redux", "react-redux",
 gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
 
-var transform = function(file, opt) {
-    var data = "";
-    return through(transform, flush);
-
-    function transform(chunk, enc, cb) {
-        console.log("transform");
-        console.log(chunk.toString());
-        data += chunk;
-        cb();
-    }
-
-    function flush(cb) {
-        console.log("flush");
-        this.push(data);
-        cb();
-    }
-}
-
 gulp.task("test", function() {
-    var b = browserify("test.js");
-    b.transform(transform);
-    b.bundle().pipe(fs.createWriteStream("./testBundle.js"));
+    var r = requirement();
+    r.plugin(new ExcludePlugin(exclude));
+    gulp.src("test.js").pipe(r).pipe(gulp.dest("bundle"));
 })
 
 gulp.task('pre-clean', function() {
