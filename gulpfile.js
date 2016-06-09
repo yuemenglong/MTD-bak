@@ -18,8 +18,9 @@ var merge = require('merge-stream');
 
 var through = require('through2');
 
-var requirement = require("./tool/requirement").requirement;
-var ExcludePlugin = require("./tool/requirement").ExcludePlugin;
+var prerequire = require("./tool/prerequire");
+var ExcludePlugin = require("./tool/exclude-plugin");
+var LessPlugin = require("./tool/less-plugin");
 
 
 var exclude = ["react", "react-dom", "redux", "react-redux",
@@ -27,13 +28,17 @@ var exclude = ["react", "react-dom", "redux", "react-redux",
     "isomorphic-fetch", "events",
 ];
 
+var assets = [".*\\.less"];
+
 gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
 
 gulp.task("test", function() {
-    var r = requirement();
+    var r = prerequire();
     r.plugin(new ExcludePlugin(exclude));
-    gulp.src("test.js").pipe(r).pipe(gulp.dest("bundle"));
+    r.plugin(new LessPlugin({ dest: "bundle/test.less" }));
+    // gulp.src("test.js").pipe(r).pipe(gulp.dest("bundle"));
+    gulp.src("test.js").pipe(r).pipe()
 })
 
 gulp.task('pre-clean', function() {

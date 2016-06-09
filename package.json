@@ -42,9 +42,11 @@
     "gulp-replace": "^0.5.4",
     "gulp-util": "^3.0.7",
     "jquery": "^2.2.3",
+    "less": "^2.7.1",
     "merge-stream": "^1.0.0",
     "through2": "^2.0.1",
     "vinyl-buffer": "^1.0.0",
+    "vinyl-fs": "^2.4.3",
     "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "^1.1.0"
   }
