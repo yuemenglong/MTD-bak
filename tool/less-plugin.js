@@ -7,25 +7,21 @@ var fs = require("fs");
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 // var vfs = require('vinyl-fs');
+var File = require("vinyl");
 
 function LessPlugin(opt) {
-    var that = this;
-    stream.PassThrough.call(this);
-    this.opt = { test: /.+\.less/, chain: [source("test.css")] };
-    this.plugin = function(file, path, line, content) {
+    var buf = [];
+    this.test = /.+\.less/;
+    this.transform = function(file, path, line, content) {
         var abs = p.resolve(p.dirname(file), path);
         var output = `@import '${abs.replace("\\", "\\\\")}';`;
-        this.push(output);
+        buf.push(output);
         content = content.replace(line, "");
         return content;
     }
-    this.on("end", function() {
-        that.push(null);
-        // that.pipe(less()).pipe(fs.createWriteStream(opt.dest));
-        // that.pipe(source("test.less")).pipe(buffer()).pipe(less);
-        // that.pipe(source("test.css")).pipe(process.stdout);
-        that.pipe(process.stdout);
-    })
+    this.vfs = function() {
+        return new File({ contents: new Buffer(buf.join("\n")) });
+    }
 }
 util.inherits(LessPlugin, stream.PassThrough);
 
