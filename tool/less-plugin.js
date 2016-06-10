@@ -30,6 +30,5 @@ function LessPlugin(opt) {
 util.inherits(LessPlugin, stream.PassThrough);
 
 // fs.createReadStream("test.js").pipe(source()).pipe(process.stdout);
-fs.createReadStream("test.js").pipe(process.stdout);
 
 module.exports = LessPlugin;
