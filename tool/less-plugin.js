@@ -14,12 +14,14 @@ function LessPlugin(name) {
     stream.Readable.call(this);
     var that = this;
     this.test = /.+\.less/;
-    this.transform = function(file, path, line, content) {
-        var abs = p.resolve(p.dirname(file), path);
-        var output = `@import '${abs.replace("\\", "\\\\")}';\n`;
-        console.log(`push: ${output}`);
-        this.push(output);
-        content = content.replace(line, "");
+    this.transform = function(file, paths, lines, content) {
+        for (var i = 0; i < paths.length; i++) {
+            var abs = p.resolve(p.dirname(file), paths[i]);
+            var output = `@import '${abs.replace("\\", "\\\\")}';\n`;
+            // console.log(`push: ${output}`);
+            this.push(output);
+        }
+        lines.splice(0);
         return content;
     }
     this._read = function() {}

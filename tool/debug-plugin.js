@@ -1,9 +1,9 @@
 var p = require("path");
 
 function DebugPlugin(exclude) {
-    this.test = /.*/;
-    this.transform = function(file, path, line, content) {
-        console.log("[DEBUG]: " + p.resolve(p.dirname(file), path));
+    this.test = ".*";
+    this.transform = function(file, paths, lines, content) {
+        console.log("[DEBUG]: " + file);
         return content;
     }
 }

@@ -13,18 +13,30 @@ function prerequire() {
             var content = Buffer.concat(buf).toString();
             var requirePattern = /^.*require\((['"]).+\1\).*$/gm;
             var pathPattern = /.*require\((['"])(.+)\1\).*/;
-            ret._plugins.forEach(function(p) {
-                var match = content.match(requirePattern);
-                match && match.forEach(function(line) {
+            var requirements = content.match(requirePattern) || [];
+            content = content.replace(requirePattern, "");
+            ret._plugins.forEach(function(plugin) {
+                var paths = [];
+                var lines = [];
+                var length = requirements.length;
+                var i = 0;
+                while (i++ < length) {
+                    var line = requirements.shift();
                     var path = line.match(pathPattern)[2];
-                    if (p.test.test(path)) {
-                        content = p.transform(file, path, line, content);
-                        if (content == undefined) {
-                            throw new Error("Maybe Forget To Return Content");
-                        }
+                    if (RegExp(plugin.test).test(path)) {
+                        paths.push(path);
+                        lines.push(line);
+                    } else {
+                        requirements.push(line);
                     }
-                })
+                }
+                content = plugin.transform(file, paths, lines, content);
+                requirements = requirements.concat(lines);
+                if (content == undefined) {
+                    throw new Error("Maybe Forget To Return Content");
+                }
             })
+            content = requirements.concat([content]).join("\n");
             this.push(new Buffer(content));
             return cb();
         })
