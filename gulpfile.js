@@ -30,6 +30,11 @@ var exclude = ["react", "react-dom", "redux", "react-redux",
 
 var assets = [".*\\.less"];
 
+var apps = fs.readdirSync("src/app").filter(function(name) {
+    var stats = fs.statSync(`src/app/${name}`)
+    return stats.isDirectory();
+});
+
 gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
 gulp.task('default', ["src", "less"]);
 
@@ -51,26 +56,42 @@ gulp.task('pre-clean', function() {
         .pipe(path(del));
 });
 
-gulp.task("dist", ["pre-clean"], function() {
-    var pre = prerequire();
-    pre.plugin(new ExcludePlugin(assets));
-    return gulp.src("src/**/*.jsx")
-        .pipe(jadeToJsx())
-        .pipe(addsrc(["src/**/*.js"]))
-        .pipe(pre())
-        .pipe(babel({ presets: ['react'] }))
-        .pipe(rename({ extname: ".js" }))
-        .pipe(gulp.dest("dist"));
-});
-
 gulp.task("build", ["pre-clean"], function() {
-    return gulp.src("src/**/*.jsx")
+    function wait() {
+        var obj = through.obj(function(file, enc, cb) {
+            console.log(file);
+            obj.on("end", function() {
+                console.log(file);
+                cb();
+            })
+        })
+        return obj;
+    }
+    var buildTask = gulp.src("src/**/*.jsx")
         .pipe(jadeToJsx())
         .pipe(addsrc(["src/**/*.js"]))
         // .pipe(babel({ presets: ['react', 'es2015'] }))
         .pipe(babel({ presets: ['react'] }))
         .pipe(rename({ extname: ".js" }))
         .pipe(gulp.dest("build"));
+    var dispatchTasks = apps.map(function(name) {
+        var path = `src/app/${name}`;
+        return gulp.src("src/bundle.js")
+            .pipe(gulp.dest(`build/app/${name}`));
+    })
+    return buildTask.pipe(wait()).pipe(merge(dispatchTasks));
+})
+
+gulp.task("dist", ["build"], function() {
+    var pre = prerequire();
+    pre.plugin(new ExcludePlugin(assets));
+    return gulp.src("build/**/*.js")
+        .pipe(pre())
+        .pipe(gulp.dest("dist"));
+});
+
+gulp.task("pack2", ["build"], function() {
+
 })
 
 gulp.task('pack-exclude', ["build"], function() {
