@@ -5,8 +5,11 @@ var stream = require("stream");
 
 var requirePattern = /^.*require\((['"]).+\1\).*$/gm;
 var pathPattern = /.*require\((['"])(.+)\1\).*/;
+var useStrictPattern = /^(['"])use strict\1.*/g
 
 function transform(file, content, plugins) {
+    var useStrict = content.match(useStrictPattern) || [];
+    content = content.replace(useStrictPattern, "");
     var requirements = content.match(requirePattern) || [];
     content = content.replace(requirePattern, "");
     plugins.forEach(function(plugin) {
@@ -30,7 +33,7 @@ function transform(file, content, plugins) {
             throw new Error("Maybe Forget To Return Content");
         }
     })
-    content = requirements.concat([content]).join("\n");
+    content = useStrict.concat(requirements).concat([content]).join("\n");
     return content;
 }
 
