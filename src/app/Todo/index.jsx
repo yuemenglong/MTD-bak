@@ -3,7 +3,10 @@ var React = require("react");
 var Todo = require("../../component/Todo");
 var EventEmitter = require("events").EventEmitter;
 
-function ExportClass() {
+require("./style.less");
+require("./style.less");
+
+function TodoAppClass() {
     this.getInitialState = function() {
         var event = new EventEmitter();
         event.on("insert", function(text) {
@@ -16,4 +19,4 @@ function ExportClass() {
     }
 }
 
-module.exports = React.createClass(new ExportClass());
+module.exports = React.createClass(new TodoAppClass());

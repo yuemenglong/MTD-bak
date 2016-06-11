@@ -40,6 +40,7 @@ function build() {
         .pipe(addsrc(["src/**/*.js"]))
         .pipe(babel({ presets: ['react'] }))
         .pipe(rename({ extname: ".js" }))
+        .pipe(addsrc(["src/**/*.less"]))
         .pipe(gulp.dest("build"));
 }
 
@@ -61,20 +62,22 @@ function dispatch() {
 }
 
 function pack() {
+    var lessTasks = [];
     var packTasks = apps.map(function(name) {
-        var pre = prerequire.transform();
+        var b = browserify(`build/app/${name}/bundle.js`);
+        var pre = prerequire.transform(b);
         var ep = new ExcludePlugin(exclude);
         var lp = new LessPlugin("bundle.css");
         pre.plugin(ep);
         pre.plugin(lp);
-        return browserify(`build/app/${name}/bundle.js`)
-            .transform(pre)
-            .bundle()
+        var lessTask = lp.pipe(gulp.dest(`bundle/${name}`));
+        lessTasks.push(lessTask);
+        return b.bundle()
             .pipe(source("bundle.js"))
             .pipe(buffer())
-            .pipe(gulp.dest(`bundle/${name}`));
+            .pipe(gulp.dest(`bundle/${name}`))
     })
-    return merge(packTasks);
+    return merge(packTasks.concat(lessTasks));
 }
 
 function clean() {

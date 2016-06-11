@@ -17,9 +17,9 @@ function LessPlugin(name) {
     this.transform = function(file, paths, lines, content) {
         for (var i = 0; i < paths.length; i++) {
             var abs = p.resolve(p.dirname(file), paths[i]);
-            var output = `@import '${abs.replace("\\", "\\\\")}';\n`;
-            // console.log(`push: ${output}`);
-            this.push(output);
+            var line = `@import '${abs.replace("\\", "\\\\")}';`;
+            console.log(`Less: ${line}`);
+            this.push(line + "\n");
         }
         lines.splice(0);
         return content;
@@ -31,9 +31,7 @@ function LessPlugin(name) {
             .pipe(buffer())
             .pipe(less());
         return ret.pipe.bind(ret);
-        // return rs.pipe.bind(rs);
     })();
-    // this.rs = rs;
 }
 util.inherits(LessPlugin, stream.Readable);
 

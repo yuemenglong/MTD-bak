@@ -46,6 +46,7 @@ function wrapPlugin(ret) {
 
 function wrapEvent(obj, ret) {
     obj.on("end", function() {
+        console.log("end");
         ret._plugins.map(function(o) {
             if (o instanceof stream.Readable) {
                 o.push(null);
@@ -62,15 +63,18 @@ function prerequire() {
             file.contents = new Buffer(content);
             this.push(file);
             return cb();
-        })
-        wrapEvent(obj, ret);
+        });
+        // wrapEvent(obj, ret);
         return obj;
     }
     wrapPlugin(ret);
     return ret;
 }
 
-prerequire.transform = function() {
+prerequire.transform = function(browserify) {
+    if (!browserify) {
+        throw new Error("Must Pass Browserify As Arguments When Use Prerequire Transform");
+    }
     var ret = function(file, opt) {
         var buf = [];
         var obj = through(function(chunk, enc, cb) {
@@ -81,11 +85,21 @@ prerequire.transform = function() {
             content = transform(file, content, ret._plugins);
             this.push(new Buffer(content));
             return cb();
-        })
-        wrapEvent(obj, ret);
+        });
+        // wrapEvent(obj, ret);
         return obj;
     }
     wrapPlugin(ret);
+    browserify.on('bundle', function(bundle) {
+        bundle.on("end", function() {
+            ret._plugins.map(function(o) {
+                if (o instanceof stream.Readable) {
+                    o.push(null);
+                }
+            })
+        })
+    })
+    browserify.transform(ret);
     return ret;
 }
 
