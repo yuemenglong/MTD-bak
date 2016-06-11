@@ -5,7 +5,7 @@ var bodyParser = require("body-parser");
 var Promise = require("bluebird");
 
 var orderService = require("./web/service/order");
-var Index = require("./build/app/Index");
+var Index = require("./dist/app/Index");
 
 var serverRender = require("./web/server-render");
 

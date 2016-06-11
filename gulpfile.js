@@ -43,18 +43,50 @@ function build() {
         .pipe(gulp.dest("build"));
 }
 
+function dist() {
+    var pre = prerequire();
+    var ep = new ExcludePlugin(assets);
+    pre.plugin(ep);
+    return gulp.src("build/**/*.js")
+        .pipe(pre())
+        .pipe(gulp.dest("dist"));
+}
+
 function dispatch() {
     var dispatchTasks = apps.map(function(name) {
-        var path = `build/app/${name}`;
         return gulp.src("build/bundle.js")
-            .pipe(gulp.dest(`build/${name}`));
+            .pipe(gulp.dest(`build/app/${name}`));
     })
     return merge(dispatchTasks);
 }
 
+function pack() {
+    var packTasks = apps.map(function(name) {
+        var pre = prerequire.transform();
+        var ep = new ExcludePlugin(exclude);
+        var lp = new LessPlugin("bundle.css");
+        pre.plugin(ep);
+        pre.plugin(lp);
+        return browserify(`build/app/${name}/bundle.js`)
+            .transform(pre)
+            .bundle()
+            .pipe(source("bundle.js"))
+            .pipe(buffer())
+            .pipe(gulp.dest(`bundle/${name}`));
+    })
+    return merge(packTasks);
+}
 
-gulp.task("pack", gulp.series(build, dispatch));
-// gulp.task("pack2", gulp.series(build));
+function clean() {
+    return gulp.src("build").pipe(path(del));
+}
+
+gulp.task("build", build);
+gulp.task("dist", dist);
+gulp.task("dispatch", dispatch);
+gulp.task("pack", pack);
+gulp.task("clean", clean);
+gulp.task("default", gulp.series(build, dist, dispatch, pack, clean));
 
 // // gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
 // // gulp.task('default', ["src", "less"]);
