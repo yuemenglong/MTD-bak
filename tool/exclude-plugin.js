@@ -1,5 +1,5 @@
 function ExcludePlugin(exclude) {
-    var pattern = "^(" + exclude.join(")|(") + ")$";
+    var pattern = "^((" + exclude.join(")|(") + "))$";
     this.test = new RegExp(pattern);
     this.transform = function(file, paths, lines, content) {
         lines.splice(0);
