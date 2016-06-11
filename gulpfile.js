@@ -36,14 +36,31 @@ gulp.task('default', ["src", "less"]);
 gulp.task("test", function() {
     var r = prerequire();
     r.plugin(new ExcludePlugin(exclude));
-    r.plugin(new LessPlugin({ dest: "bundle/test.less" }));
+    r.plugin(new LessPlugin());
     // gulp.src("test.js").pipe(r).pipe(gulp.dest("bundle"));
-    gulp.src("test.js").pipe(r).pipe()
+    var t = through(function(chunk, enc, cb) {
+        return cb();
+    }, function(cb) {
+        return cb();
+    })
+    gulp.src("./none.js").pipe(t).pipe(gulp.dest("bundle"));
 })
 
 gulp.task('pre-clean', function() {
     return gulp.src(["temp", "build"])
         .pipe(path(del));
+});
+
+gulp.task("dist", ["pre-clean"], function() {
+    var pre = prerequire();
+    pre.plugin(new ExcludePlugin(assets));
+    return gulp.src("src/**/*.jsx")
+        .pipe(jadeToJsx())
+        .pipe(addsrc(["src/**/*.js"]))
+        .pipe(pre())
+        .pipe(babel({ presets: ['react'] }))
+        .pipe(rename({ extname: ".js" }))
+        .pipe(gulp.dest("dist"));
 });
 
 gulp.task("build", ["pre-clean"], function() {
