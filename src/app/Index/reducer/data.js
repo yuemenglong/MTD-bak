@@ -5,8 +5,12 @@ function reducer(state, action) {
     switch (action.type) {
         case "FETCH_DATA_SUCC":
             var wnd = _.clone(state.window);
-            var bars = action.data;
+            var bars = action.data.reduce(function(acc, item) {
+                acc.unshift(item);
+                return acc;
+            }, []);
             updateBars(bars);
+            wnd.pos = _.nth(bars, -1).x2;
             updateWindow(bars, wnd);
             state = { bars: bars, window: wnd };
             return state;
@@ -22,7 +26,7 @@ function updateBars(bars) {
     if (!bars.length) {
         return;
     }
-    bars[0].x1 = 0.5 * BAR_GAP;
+    bars[0].x1 = BAR_GAP / 2;
     for (var i in bars) {
         (i > 0) && (bars[i].x1 = bars[i - 1].x2 + BAR_GAP);
         bars[i].x2 = bars[i].x1 + BAR_WIDTH;

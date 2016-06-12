@@ -62,16 +62,17 @@ function mapStateToProps(state) {
     // setTexts(props, state);
     return props;
 }
+var BAR_STROKE_WIDTH = 0.8;
 
 function addBars(bars, wnd, props) {
     var displayBars = bars.filter(function(bar) {
-        return bar.x2 >= wnd.pos ||
-            bar.x1 <= wnd.pos + wnd.width;
+        var mid = (bar.x1 + bar.x2) / 2;
+        return wnd.pos <= mid && mid <= wnd.pos + wnd.width;
     })
-    wnd.high = _(displayBars).maxBy(item => item.high) || { high: 0 };
-    wnd.low = _(displayBars).minBy(item => item.low) || { low: 0 };
+    wnd.high = (_(displayBars).maxBy(item => item.high) || { high: 0 }).high;
+    wnd.low = (_(displayBars).minBy(item => item.low) || { low: 0 }).low;
 
-    bars.map(function(bar) {
+    displayBars.map(function(bar) {
         props.rects.push(getBarRect(wnd, bar));
         props.lines.push(getUpperLine(wnd, bar));
         props.lines.push(getUnderLine(wnd, bar));
@@ -92,7 +93,7 @@ function getBarRect(wnd, bar) {
     var y1 = getY(wnd, bar.y1);
     var y2 = getY(wnd, bar.y2);
     var fillClr = bar.close >= bar.open ? "#FFF" : "#000";
-    var style = { fill: fillClr, stroke: "#000", strokeWidth: Bar.strokeWidth };
+    var style = { fill: fillClr, stroke: "#000", strokeWidth: BAR_STROKE_WIDTH };
     return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
@@ -101,7 +102,7 @@ function getUpperLine(wnd, bar) {
     var x2 = getX(wnd, (bar.x1 + bar.x2) / 2);
     var y1 = getY(wnd, bar.y2);
     var y2 = getY(wnd, bar.high);
-    var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
+    var style = { stroke: "#000", strokeWidth: BAR_STROKE_WIDTH };
     return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
@@ -110,7 +111,7 @@ function getUnderLine(wnd, bar) {
     var x2 = getX(wnd, (bar.x1 + bar.x2) / 2);
     var y1 = getY(wnd, bar.low);
     var y2 = getY(wnd, bar.y1);
-    var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
+    var style = { stroke: "#000", strokeWidth: BAR_STROKE_WIDTH };
     return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
