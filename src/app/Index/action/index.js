@@ -5,6 +5,8 @@ var moment = require("moment");
 
 var Action = {};
 
+Action.FETCH_DATA_SUCC = "FETCH_DATA_SUCC";
+
 Action.fetchOrder = function() {
     return function(dispatch, getState) {
         fetch("/order").then(function(res) {

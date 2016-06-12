@@ -38,4 +38,10 @@ app.get("/order", function(req, res) {
         .then((orders) => res.json(orders));
 })
 
-app.listen(80);
+app.listen(80, function(err) {
+    if (err) {
+        console.log("Start Fail !!!");
+    } else {
+        console.log("Start Succ ...");
+    }
+});

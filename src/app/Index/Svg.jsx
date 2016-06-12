@@ -45,13 +45,74 @@ function setTexts(props, state) {
     props.texts = [{ x: 10, y: 30, text: text, style: { stroke: "#0f0", fill: "#0f0", fontSize: "30" } }];
 }
 
+// input:
+// bars[{open,high,low,close,x1,y1,x2,y2,ma30}] 
+// window{width, height, pos}
+// output:
+// {style, rects[], lines[], paths[], texts[]}
 function mapStateToProps(state) {
-    var props = { style: state.init.style };
-    setRects(props, state);
-    setLines(props, state);
-    setPaths(props, state);
-    setTexts(props, state);
+    var bars = state.data.bars;
+    var wnd = _.clone(state.data.window);
+    var style = { width: wnd.width, height: wnd.height, backgroundColor: "#888" };
+    var props = { style: style, rects: [], lines: [], paths: [], texts: [] };
+    addBars(bars, wnd, props);
+    // setRects(props, state);
+    // setLines(props, state);
+    // setPaths(props, state);
+    // setTexts(props, state);
     return props;
 }
+
+function addBars(bars, wnd, props) {
+    var displayBars = bars.filter(function(bar) {
+        return bar.x2 >= wnd.pos ||
+            bar.x1 <= wnd.pos + wnd.width;
+    })
+    wnd.high = _(displayBars).maxBy(item => item.high) || { high: 0 };
+    wnd.low = _(displayBars).minBy(item => item.low) || { low: 0 };
+
+    bars.map(function(bar) {
+        props.rects.push(getBarRect(wnd, bar));
+        props.lines.push(getUpperLine(wnd, bar));
+        props.lines.push(getUnderLine(wnd, bar));
+    })
+}
+
+function getX(wnd, x) {
+    return wnd.pos + wnd.width - x;
+}
+
+function getY(wnd, y) {
+    return (wnd.high - y) / (wnd.high - wnd.low) * wnd.height;
+}
+
+function getBarRect(wnd, bar) {
+    var x1 = getX(wnd, bar.x1);
+    var x2 = getX(wnd, bar.x2);
+    var y1 = getY(wnd, bar.y1);
+    var y2 = getY(wnd, bar.y2);
+    var fillClr = bar.close >= bar.open ? "#FFF" : "#000";
+    var style = { fill: fillClr, stroke: "#000", strokeWidth: Bar.strokeWidth };
+    return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
+}
+
+function getUpperLine(wnd, bar) {
+    var x1 = getX(wnd, (bar.x1 + bar.x2) / 2);
+    var x2 = getX(wnd, (bar.x1 + bar.x2) / 2);
+    var y1 = getY(wnd, bar.y2);
+    var y2 = getY(wnd, bar.high);
+    var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
+    return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
+}
+
+function getUnderLine(wnd, bar) {
+    var x1 = getX(wnd, (bar.x1 + bar.x2) / 2);
+    var x2 = getX(wnd, (bar.x1 + bar.x2) / 2);
+    var y1 = getY(wnd, bar.low);
+    var y2 = getY(wnd, bar.y1);
+    var style = { stroke: "#000", strokeWidth: Bar.strokeWidth };
+    return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
+}
+
 
 module.exports = connect(mapStateToProps)(Svg);
