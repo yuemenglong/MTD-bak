@@ -1,5 +1,8 @@
 var _ = require("lodash");
 
+var BAR_WIDTH = 4;
+var BAR_GAP = 4;
+
 function reducer(state, action) {
     state = state || { bars: [], window: { width: 1280, height: 640, pos: 0 } };
     switch (action.type) {
@@ -12,15 +15,22 @@ function reducer(state, action) {
             updateBars(bars);
             wnd.pos = _.nth(bars, -1).x2;
             updateWindow(bars, wnd);
-            state = { bars: bars, window: wnd };
-            return state;
+            return { bars: bars, window: wnd };
+        case "MOVE_PREV":
+            var wnd = _.clone(state.window);
+            wnd.pos += (BAR_WIDTH + BAR_GAP);
+            updateWindow(state.bars, wnd);
+            return { bars: state.bars, window: wnd };
+        case "MOVE_NEXT":
+            var wnd = _.clone(state.window);
+            wnd.pos -= (BAR_WIDTH + BAR_GAP);
+            updateWindow(state.bars, wnd);
+            return { bars: state.bars, window: wnd };
         default:
             return state;
     }
 }
 
-var BAR_WIDTH = 4;
-var BAR_GAP = 4;
 
 function updateBars(bars) {
     if (!bars.length) {

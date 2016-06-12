@@ -15,26 +15,26 @@ function WindowClass() {
     this.componentDidMount = function() {
         var dispatch = this.props.dispatch;
         $.ajaxSetup({ contentType: "application/json; charset=utf-8" });
-        // $(document).keydown(function(e) {
-        //     console.log(e.keyCode);
-        //     if (e.keyCode === 39) {
-        //         dispatch({ type: "MOVE_NEXT" });
-        //     } else if (e.keyCode === 37) {
-        //         dispatch({ type: "MOVE_PREV" });
-        //     } else if (e.keyCode === 66) {
-        //         var bar = Bar.displayBars()[0];
-        //         var order = new Order({
-        //             type: "BUY",
-        //             price: bar.close,
-        //             volumn: 0.2,
-        //             createTime: bar.datetime,
-        //             openPrice: bar.close,
-        //             openTime: bar.datetime,
-        //             status: "OPEN",
-        //         });
-        //         dispatch(Action.sendOrder(order));
-        //     }
-        // })
+        $(document).keydown(function(e) {
+            console.log(e.keyCode);
+            if (e.keyCode === 39) {
+                dispatch({ type: "MOVE_NEXT" });
+            } else if (e.keyCode === 37) {
+                dispatch({ type: "MOVE_PREV" });
+                // } else if (e.keyCode === 66) {
+                //     var bar = Bar.displayBars()[0];
+                //     var order = new Order({
+                //         type: "BUY",
+                //         price: bar.close,
+                //         volumn: 0.2,
+                //         createTime: bar.datetime,
+                //         openPrice: bar.close,
+                //         openTime: bar.datetime,
+                //         status: "OPEN",
+                //     });
+                //     dispatch(Action.sendOrder(order));
+            }
+        })
         $(document).ready(function() {
             dispatch(Action.fetchData());
             // dispatch(Action.fetchOrder());

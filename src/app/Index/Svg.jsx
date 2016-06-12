@@ -56,13 +56,16 @@ function mapStateToProps(state) {
     var style = { width: wnd.width, height: wnd.height, backgroundColor: "#888" };
     var props = { style: style, rects: [], lines: [], paths: [], texts: [] };
     addBars(bars, wnd, props);
+    addGrid(props);
     // setRects(props, state);
     // setLines(props, state);
     // setPaths(props, state);
     // setTexts(props, state);
     return props;
 }
+
 var BAR_STROKE_WIDTH = 0.8;
+var GRID = 32;
 
 function addBars(bars, wnd, props) {
     var displayBars = bars.filter(function(bar) {
@@ -77,6 +80,17 @@ function addBars(bars, wnd, props) {
         props.lines.push(getUpperLine(wnd, bar));
         props.lines.push(getUnderLine(wnd, bar));
     })
+}
+
+function addGrid(props) {
+    var style = { strokeDasharray: "3 3", stroke: "#FFF", strokeWidth: 0.5 };
+    //horizen
+    for (var i = 0; i < props.style.height; i += GRID) {
+        props.lines.push({ x1: 0, y1: i, x2: props.style.width, y2: i, style: style });
+    }
+    for (var i = 0; i < props.style.width; i += GRID) {
+        props.lines.push({ x1: i, y1: 0, x2: i, y2: props.style.height, style: style });
+    }
 }
 
 function getX(wnd, x) {
