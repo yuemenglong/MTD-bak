@@ -12,14 +12,25 @@ Action.fetchOrder = function() {
         fetch("/order").then(function(res) {
             return res.json();
         }).then(function(json) {
-            var orders = json.map(o => new Order(o));
-            dispatch({ type: "FETCH_ORDER_SUCC", orders: orders })
+            dispatch({ type: "FETCH_ORDER_SUCC", orders: json })
         })
     }
 }
 
+//{type, volumn}
 Action.sendOrder = function(order) {
     return function(dispatch, getState) {
+        var wnd = getState().data.wnd;
+        if (order.type === "BUY" || order.type === "SELL") {
+            var bar = getState().data.displayBars[0];
+            _.merge(order, {
+                price: bar.close,
+                openPrice: bar.close,
+                createTime: bar.datetime,
+                openTime: bar.datetime,
+                status: "OPEN"
+            });
+        }
         var json = JSON.stringify(order);
         console.log(json);
         $.post("/order", json, function(res) {

@@ -4,7 +4,7 @@ var BAR_WIDTH = 4;
 var BAR_GAP = 4;
 
 function reducer(state, action) {
-    state = state || { bars: [], window: { width: 1280, height: 640, pos: 0 } };
+    state = state || { bars: [], displayBars: [], window: { width: 1280, height: 640, pos: 0 } };
     switch (action.type) {
         case "FETCH_DATA_SUCC":
             var wnd = _.clone(state.window);
@@ -14,18 +14,18 @@ function reducer(state, action) {
             }, []);
             updateBars(bars);
             wnd.pos = _.nth(bars, -1).x2;
-            updateWindow(bars, wnd);
-            return { bars: bars, window: wnd };
+            var displayBars = updateWindow(bars, wnd);
+            return { bars: bars, displayBars: displayBars, window: wnd };
         case "MOVE_PREV":
             var wnd = _.clone(state.window);
             wnd.pos += (BAR_WIDTH + BAR_GAP);
-            updateWindow(state.bars, wnd);
-            return { bars: state.bars, window: wnd };
+            var displayBars = updateWindow(state.bars, wnd);
+            return { bars: state.bars, displayBars: displayBars, window: wnd };
         case "MOVE_NEXT":
             var wnd = _.clone(state.window);
             wnd.pos -= (BAR_WIDTH + BAR_GAP);
-            updateWindow(state.bars, wnd);
-            return { bars: state.bars, window: wnd };
+            var displayBars = updateWindow(state.bars, wnd);
+            return { bars: state.bars, displayBars: displayBars, window: wnd };
         default:
             return state;
     }
@@ -50,6 +50,16 @@ function updateWindow(bars, wnd) {
     var n = _(bars).sortedIndexBy({ x2: wnd.pos }, "x2");
     var first = bars[n] || bars[n - 1] || { x1: 0 };
     wnd.pos = first.x1 - BAR_GAP / 2;
+
+    var displayBars = bars.filter(function(bar) {
+        var mid = (bar.x1 + bar.x2) / 2;
+        return wnd.pos <= mid && mid <= wnd.pos + wnd.width;
+    })
+    wnd.high = (_(displayBars).maxBy(item => item.high) || { high: 0 }).high;
+    wnd.low = (_(displayBars).minBy(item => item.low) || { low: 0 }).low;
+    wnd.startTime = (_.nth(displayBars, -1) || { datetime: null }).datetime;
+    wnd.endTime = (_.nth(displayBars, 0) || { datetime: null }).datetime;
+    return displayBars;
 }
 
 function MA(bars, n, name) {

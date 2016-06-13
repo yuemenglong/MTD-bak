@@ -52,30 +52,52 @@ function setTexts(props, state) {
 // {style, rects[], lines[], paths[], texts[]}
 function mapStateToProps(state) {
     var bars = state.data.bars;
-    var wnd = _.clone(state.data.window);
+    var displayBars = state.data.displayBars;
+    var wnd = state.data.window;
+    var orders = state.orders;
     var style = { width: wnd.width, height: wnd.height, backgroundColor: "#888" };
     var props = { style: style, rects: [], lines: [], paths: [], texts: [] };
-    addBars(bars, wnd, props);
+
     addGrid(props);
-    // setRects(props, state);
-    // setLines(props, state);
-    // setPaths(props, state);
-    // setTexts(props, state);
+    addBars(displayBars, wnd, props);
+    addOrders(orders, wnd, props);
     return props;
 }
 
 var BAR_STROKE_WIDTH = 0.8;
 var GRID = 32;
 
-function addBars(bars, wnd, props) {
-    var displayBars = bars.filter(function(bar) {
-        var mid = (bar.x1 + bar.x2) / 2;
-        return wnd.pos <= mid && mid <= wnd.pos + wnd.width;
+function addOrders(orders, wnd, props) {
+    if (!wnd.startTime || !wnd.endTime) return;
+    orders.map(function(o) {
+        console.log(o);
+        if (o.closeTime &&
+            ((wnd.startTime <= o.openTime && o.openTime <= wnd.endTime) ||
+                (wnd.startTime <= o.closeTime && o.closeTime <= wnd.endTime)
+            )) {
+            //1. 已经成交且时间与窗口有重合
+            var startBar = getBarByTime(displayBars, o.openTime);
+            var endBar = getBarByTime(displayBars, o.closeTime);
+            var style = { stroke: "#00f", strokeDasharray: "5,5" }
+            var key = o.id;
+            var x1 = getX(wnd, (startBar.x1 + startBar.x2) / 2);
+            var x2 = getX(wnd, (endBar.x1 + endBar.x2) / 2);
+            var y1 = getY(wnd, o.openPrice);
+            var y2 = getY(wnd, o.closePrice);
+            var line = { x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style };
+            props.lines.push(line);
+        } else if (!o.closeTime && o.createTime <= wnd.end) {
+            //2. 未成交但是挂单时间在窗口之前
+            var style = { stroke: "#0f0", strokeDasharray: "5,5" }
+            var y = getY(wnd, o.price);
+            var key = `create-${o.id}`;
+            props.lines.push({ x1: 0, y1: y, x2: wnd.width, y2: y, style: style, key: key });
+        }
     })
-    wnd.high = (_(displayBars).maxBy(item => item.high) || { high: 0 }).high;
-    wnd.low = (_(displayBars).minBy(item => item.low) || { low: 0 }).low;
+}
 
-    displayBars.map(function(bar) {
+function addBars(bars, wnd, props) {
+    bars.map(function(bar) {
         props.rects.push(getBarRect(wnd, bar));
         props.lines.push(getUpperLine(wnd, bar));
         props.lines.push(getUnderLine(wnd, bar));
@@ -129,5 +151,25 @@ function getUnderLine(wnd, bar) {
     return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
 }
 
+function getBarByTime(bars, datetime, from, to) {
+    //返回大于等于给定时间的第一个
+    //如果给定时间大于所有的，则返回最大的时间，idx为0
+    from = from === undefined ? 0 : from;
+    to = to === undefined ? bars.length - 1 : to;
+    if (from == to) {
+        return bars[from];
+    }
+    var mid = _.floor((from + to) / 2);
+    var small = bars[mid + 1].datetime;
+    var large = bars[mid].datetime;
+    if (small < datetime && datetime <= large) {
+        return bars[mid];
+    }
+    if (datetime <= small) {
+        return getBarByTime(bars, datetime, mid + 1, to);
+    } else {
+        return getBarByTime(bars, datetime, from, mid);
+    }
+}
 
 module.exports = connect(mapStateToProps)(Svg);

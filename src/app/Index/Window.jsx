@@ -7,6 +7,7 @@ var connect = ReactRedux.connect;
 var Bar = require("./busi/bar");
 var Order = require("./busi/order");
 var Action = require("./action");
+var ordersAction = require("./reducer/orders").action;
 
 var Svg = require("./Svg");
 var OrderTable = require("./OrderTable");
@@ -21,23 +22,18 @@ function WindowClass() {
                 dispatch({ type: "MOVE_NEXT" });
             } else if (e.keyCode === 37) {
                 dispatch({ type: "MOVE_PREV" });
-                // } else if (e.keyCode === 66) {
-                //     var bar = Bar.displayBars()[0];
-                //     var order = new Order({
-                //         type: "BUY",
-                //         price: bar.close,
-                //         volumn: 0.2,
-                //         createTime: bar.datetime,
-                //         openPrice: bar.close,
-                //         openTime: bar.datetime,
-                //         status: "OPEN",
-                //     });
-                //     dispatch(Action.sendOrder(order));
+            } else if (e.keyCode === 66) {
+                var bar = Bar.displayBars()[0];
+                var order = {
+                    type: "BUY",
+                    volumn: 0.2,
+                };
+                dispatch(ordersAction.sendOrder(order));
             }
         })
         $(document).ready(function() {
             dispatch(Action.fetchData());
-            // dispatch(Action.fetchOrder());
+            dispatch(ordersAction.fetchOrder());
         })
     }
     this.render = function() {

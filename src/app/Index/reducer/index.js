@@ -3,7 +3,7 @@ var combineReducers = Redux.combineReducers;
 // var init = require("./init");
 // var displayBars = require("./displayBars");
 // var displayOrders = require("./displayOrders");
-// var orders = require("./orders");
 var data = require("./data");
+var orders = require("./orders");
 
-module.exports = combineReducers({ data });
+module.exports = combineReducers({ data, orders });
