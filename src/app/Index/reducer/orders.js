@@ -25,6 +25,12 @@ function reducer(state, action) {
         case "SEND_ORDER_SUCC":
             var order = action.order;
             return update(state, { $push: [order] });
+        case "DELETE_ORDER_SUCC":
+            var id = action.id;
+            var idx = _.findIndex(state, function(o) {
+                return o.id === id;
+            })
+            return update(state, { $splice: [[idx, 1]] });
         default:
             return state;
     }
@@ -40,9 +46,8 @@ function Action() {
             })
         }
     }
-
-    //{type, volumn}
     this.sendOrder = function(order) {
+        //{type, volumn}
         return function(dispatch, getState) {
             var wnd = getState().data.window;
             if (order.type === "BUY" || order.type === "SELL") {
@@ -62,13 +67,23 @@ function Action() {
             });
         }
     };
-
     this.updateOrder = function(order) {
         return function(dispatch, getState) {
             var json = JSON.stringify(order);
             $.post("/order/" + order.id, json, function(res) {
                 dispatch({ type: "UPDATE_ORDER_SUCC", order: new Order(res) });
             });
+        }
+    }
+    this.deleteOrder = function(id) {
+        return function(dispatch, getState) {
+            var opt = {
+                method: "DELETE",
+                success: function() {
+                    dispatch({ type: "DELETE_ORDER_SUCC", id: id })
+                }
+            };
+            $.ajax("/order/" + id, opt);
         }
     }
 }

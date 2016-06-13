@@ -38,6 +38,15 @@ app.get("/order", function(req, res) {
         .then((orders) => res.json(orders));
 })
 
+app.delete("/order/:id", function(req, res) {
+    var id = req.params.id;
+    Promise.try(function() {
+        return orderService.delete(id);
+    }).then(function() {
+        res.end();
+    })
+})
+
 app.listen(80, function(err) {
     if (err) {
         console.log("Start Fail !!!");

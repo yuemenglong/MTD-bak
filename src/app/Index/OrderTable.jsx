@@ -5,6 +5,7 @@ var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
 
 var Action = require("./action");
+var ordersAction = require("./reducer/orders").action;
 var Window = require("./busi/window");
 
 // orders[] 
@@ -20,10 +21,14 @@ function OrderTableClass() {
         this.props.dispatch(Action.updateOrder(order));
         return false;
     }
+    this.onDeleteClick = function(id) {
+        this.props.dispatch(ordersAction.deleteOrder(id));
+    }
     this.renderOperate = function(id) {
         return jade(`
             td(key="op")
                 a(href="#" onClick={this.onCloseClick.bind(null, id)}) 平仓
+                a(href="#" onClick={this.onDeleteClick.bind(null, id)}) 删除
             `)
     }
     this.renderDate = function(o) {
