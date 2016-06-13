@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var update = require('react-addons-update');
 
 function Order(order) {
     _.merge(this, order)
@@ -21,6 +22,9 @@ function reducer(state, action) {
                 return new Order(o);
             })
             return orders;
+        case "SEND_ORDER_SUCC":
+            var order = action.order;
+            return update(state, { $push: [order] });
         default:
             return state;
     }
@@ -53,7 +57,6 @@ function Action() {
             }
             order = new Order(order);
             var json = JSON.stringify(order);
-            console.log(json);
             $.post("/order", json, function(res) {
                 dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
             });
