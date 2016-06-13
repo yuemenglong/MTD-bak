@@ -6,7 +6,7 @@ var connect = ReactRedux.connect;
 
 var Bar = require("./busi/bar");
 var Order = require("./busi/order");
-var Action = require("./action");
+var dataAction = require("./reducer/data").action;
 var ordersAction = require("./reducer/orders").action;
 
 var Svg = require("./Svg");
@@ -23,7 +23,6 @@ function WindowClass() {
             } else if (e.keyCode === 37) {
                 dispatch({ type: "MOVE_PREV" });
             } else if (e.keyCode === 66) {
-                var bar = Bar.displayBars()[0];
                 var order = {
                     type: "BUY",
                     volumn: 0.2,
@@ -32,12 +31,15 @@ function WindowClass() {
             }
         })
         $(document).ready(function() {
-            dispatch(Action.fetchData());
+            dispatch(dataAction.fetchData());
             dispatch(ordersAction.fetchOrder());
         })
     }
     this.render = function() {
-        return jade("Svg");
+        return jade(`
+            div
+                Svg
+                OrderTable`);
     }
 }
 

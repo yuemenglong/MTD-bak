@@ -3,13 +3,18 @@ var _ = require("lodash");
 var BAR_WIDTH = 4;
 var BAR_GAP = 4;
 
+function Bar(bar) {
+    _.merge(this, bar);
+    this.datetime = new Date(this.datetime);
+}
+
 function reducer(state, action) {
     state = state || { bars: [], displayBars: [], window: { width: 1280, height: 640, pos: 0 } };
     switch (action.type) {
         case "FETCH_DATA_SUCC":
             var wnd = _.clone(state.window);
             var bars = action.data.reduce(function(acc, item) {
-                acc.unshift(item);
+                acc.unshift(new Bar(item));
                 return acc;
             }, []);
             updateBars(bars);
@@ -77,4 +82,17 @@ function MA(bars, n, name) {
     }
 }
 
+function Action() {
+    this.fetchData = function() {
+        return function(dispatch, getState) {
+            fetch("/static/data/2001.json").then(function(res) {
+                return res.json();
+            }).then(function(json) {
+                dispatch({ type: "FETCH_DATA_SUCC", data: json });
+            })
+        };
+    }
+}
+
 module.exports = reducer;
+module.exports.action = new Action();

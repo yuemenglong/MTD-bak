@@ -70,7 +70,6 @@ var GRID = 32;
 function addOrders(orders, wnd, props) {
     if (!wnd.startTime || !wnd.endTime) return;
     orders.map(function(o) {
-        console.log(o);
         if (o.closeTime &&
             ((wnd.startTime <= o.openTime && o.openTime <= wnd.endTime) ||
                 (wnd.startTime <= o.closeTime && o.closeTime <= wnd.endTime)
@@ -86,7 +85,7 @@ function addOrders(orders, wnd, props) {
             var y2 = getY(wnd, o.closePrice);
             var line = { x1: x1, y1: y1, x2: x2, y2: y2, key: key, style: style };
             props.lines.push(line);
-        } else if (!o.closeTime && o.createTime <= wnd.end) {
+        } else if (!o.closeTime && o.createTime <= wnd.endTime) {
             //2. 未成交但是挂单时间在窗口之前
             var style = { stroke: "#0f0", strokeDasharray: "5,5" }
             var y = getY(wnd, o.price);

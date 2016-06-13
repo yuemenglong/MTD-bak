@@ -70,6 +70,5 @@ function Action() {
     }
 }
 
-
 module.exports = reducer;
 module.exports.action = new Action();

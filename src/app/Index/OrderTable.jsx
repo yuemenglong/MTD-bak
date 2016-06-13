@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var moment = require("moment");
 var React = require("react");
 var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
@@ -33,7 +34,7 @@ function OrderTableClass() {
         }
     }
     this.render = function() {
-        var header = ["id", "type", "price", "volumn", "stopLoss", "stopWin", "status", "createTime", "openTime", "closeTime", "operate"];
+        var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "createTime", "openTime", "closeTime", "operate"];
         var that = this;
         return jade(`
             table(className="table")
@@ -56,7 +57,18 @@ function OrderTableClass() {
 }
 
 function mapStateToProps(state) {
-    return { orders: state.orders };
+    var orders = state.orders.map(function(o) {
+        return _.mapValues(o, function(value) {
+            if (_.isDate(value)) {
+                return moment(value).format("YYYY-MM-DD HH:mm:SS");
+            }
+            return value;
+        });
+    })
+    orders = _.sortBy(orders, function(o) {
+        return o.createTime;
+    })
+    return { orders: orders };
 }
 
 var OrderTable = React.createClass(new OrderTableClass());
