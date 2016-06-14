@@ -25,12 +25,24 @@ function reducer(state, action) {
         case "SEND_ORDER_SUCC":
             var order = action.order;
             return update(state, { $push: [order] });
+        case "CLOSE_ORDER_SUCC":
+            var order = action.order;
+            var idx = _.findIndex(state, function(o) {
+                return o.id === order.id;
+            })
+            var cond = {};
+            cond[idx] = { $set: order };
+            return update(state, cond);
         case "DELETE_ORDER_SUCC":
             var id = action.id;
             var idx = _.findIndex(state, function(o) {
                 return o.id === id;
             })
-            return update(state, { $splice: [[idx, 1]] });
+            return update(state, {
+                $splice: [
+                    [idx, 1]
+                ]
+            });
         default:
             return state;
     }
@@ -67,12 +79,24 @@ function Action() {
             });
         }
     };
+    this.closeOrder = function(id) {
+        return function(dispatch, getState) {
+            var state = getState();
+            var order = state.orders.filter(function(o) {
+                return o.id === id;
+            })[0];
+            order.closeTime = state.data.displayBars[0].datetime;
+            order.closePrice = state.data.displayBars[0].close;
+            order.status = "CLOSE";
+            var json = JSON.stringify(order);
+            $.post("/order/" + id, json, function(res) {
+                dispatch({ type: "CLOSE_ORDER_SUCC", order: new Order(res) });
+            });
+        }
+    }
     this.updateOrder = function(order) {
         return function(dispatch, getState) {
-            var json = JSON.stringify(order);
-            $.post("/order/" + order.id, json, function(res) {
-                dispatch({ type: "UPDATE_ORDER_SUCC", order: new Order(res) });
-            });
+
         }
     }
     this.deleteOrder = function(id) {

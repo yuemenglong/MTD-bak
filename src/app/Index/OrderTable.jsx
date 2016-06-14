@@ -10,18 +10,12 @@ var Window = require("./busi/window");
 // orders[] 
 function OrderTableClass() {
     this.onCloseClick = function(id) {
-        var order = this.props.orders.filter(function(o) {
-            return o.id === id;
-        })[0];
-        if (!order) return;
-        order.closeTime = Window.endTime();
-        order.closePrice = Window.endPrice();
-        order.status = "CLOSE";
-        this.props.dispatch(ordersAction.updateOrder(order));
+        this.props.dispatch(ordersAction.closeOrder(id));
         return false;
     }
     this.onDeleteClick = function(id) {
         this.props.dispatch(ordersAction.deleteOrder(id));
+        return false;
     }
     this.renderOperate = function(id) {
         return jade(`

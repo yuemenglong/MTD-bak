@@ -60,14 +60,14 @@ function mapStateToProps(state) {
 
     addGrid(props);
     addBars(displayBars, wnd, props);
-    addOrders(orders, wnd, props);
+    addOrders(orders, displayBars, wnd, props);
     return props;
 }
 
 var BAR_STROKE_WIDTH = 0.8;
 var GRID = 32;
 
-function addOrders(orders, wnd, props) {
+function addOrders(orders, displayBars, wnd, props) {
     if (!wnd.startTime || !wnd.endTime) return;
     orders.map(function(o) {
         if (o.closeTime &&
