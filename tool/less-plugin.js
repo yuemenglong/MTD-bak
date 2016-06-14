@@ -18,7 +18,7 @@ function LessPlugin(name) {
         for (var i = 0; i < paths.length; i++) {
             var abs = p.resolve(p.dirname(file), paths[i]);
             var line = `@import '${abs.replace("\\", "\\\\")}';`;
-            console.log(`Less: ${line}`);
+            console.log(`[Less]: ${line}`);
             this.push(line + "\n");
         }
         lines.splice(0);

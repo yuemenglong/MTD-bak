@@ -35,7 +35,7 @@ function OrderTableClass() {
         var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "createTime", "openTime", "closeTime", "operate"];
         var that = this;
         return jade(`
-            table(className="table")
+            table(className="table table-bordered")
                 thead
                     tr #{}
                 tbody #{}`,
@@ -45,7 +45,7 @@ function OrderTableClass() {
             function() {
                 return _.map(that.props.orders, function(order) {
                     return jade("tr(key={order.id}) #{}", function() {
-                        return _.map(header, o => jade("td(key={o}) {that.renderDate(order[o])}"))
+                        return _.map(header.slice(0, -1), o => jade("td(key={o}) {that.renderDate(order[o])}"))
                             .concat([that.renderOperate(order.id)]);
                     });
                 })

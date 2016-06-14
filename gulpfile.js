@@ -19,6 +19,7 @@ var merge = require('merge-stream');
 var through = require('through2');
 
 var prerequire = require("./tool/prerequire");
+var DebugPlugin= require("./tool/debug-plugin");
 var ExcludePlugin = require("./tool/exclude-plugin");
 var LessPlugin = require("./tool/less-plugin");
 
@@ -66,8 +67,10 @@ function pack() {
     var packTasks = apps.map(function(name) {
         var b = browserify(`build/app/${name}/bundle.js`);
         var pre = prerequire.transform(b);
+        var dp = new DebugPlugin();
         var ep = new ExcludePlugin(exclude);
         var lp = new LessPlugin("bundle.css");
+        pre.plugin(dp);
         pre.plugin(ep);
         pre.plugin(lp);
         var lessTask = lp.pipe(gulp.dest(`bundle/${name}`));
@@ -91,127 +94,17 @@ gulp.task("pack", pack);
 gulp.task("clean", clean);
 gulp.task("default", gulp.series(build, dist, dispatch, pack, clean));
 
-// // gulp.task('src', ["pre-clean", "build", "pack", "post-clean"]);
-// // gulp.task('default', ["src", "less"]);
 
-// gulp.task("test", function() {
-//     var r = prerequire();
-//     r.plugin(new ExcludePlugin(exclude));
-//     r.plugin(new LessPlugin());
-//     // gulp.src("test.js").pipe(r).pipe(gulp.dest("bundle"));
-//     var t = through(function(chunk, enc, cb) {
-//         return cb();
-//     }, function(cb) {
-//         return cb();
-//     })
-//     gulp.src("./none.js").pipe(t).pipe(gulp.dest("bundle"));
-// })
+gulp.task("server-render", function() {
+    return gulp.src("web/server-render.jsx")
+        .pipe(jadeToJsx())
+        .pipe(babel({ presets: ['react'] }))
+        .pipe(rename({ extname: ".js" }))
+        .pipe(gulp.dest("web/"));
+})
 
-// gulp.task('pre-clean', function() {
-//     return gulp.src(["temp", "build"])
-//         .pipe(path(del));
-// });
 
-// gulp.task("build", ["pre-clean"], function() {
-//     function wait() {
-//         var obj = through.obj(function(file, enc, cb) {
-//             console.log(file);
-//             obj.on("end", function() {
-//                 console.log(file);
-//                 cb();
-//             })
-//         })
-//         return obj;
-//     }
-//     var buildTask = gulp.src("src/**/*.jsx")
-//         .pipe(jadeToJsx())
-//         .pipe(addsrc(["src/**/*.js"]))
-//         // .pipe(babel({ presets: ['react', 'es2015'] }))
-//         .pipe(babel({ presets: ['react'] }))
-//         .pipe(rename({ extname: ".js" }))
-//         .pipe(gulp.dest("build"));
-//     var dispatchTasks = apps.map(function(name) {
-//         var path = `src/app/${name}`;
-//         return gulp.src("src/bundle.js")
-//             .pipe(gulp.dest(`build/app/${name}`));
-//     })
-//     return buildTask.pipe(wait()).pipe(merge(dispatchTasks));
-// })
-
-// gulp.task("dist", ["build"], function() {
-//     var pre = prerequire();
-//     pre.plugin(new ExcludePlugin(assets));
-//     return gulp.src("build/**/*.js")
-//         .pipe(pre())
-//         .pipe(gulp.dest("dist"));
-// });
-
-// gulp.task('pack-exclude', ["build"], function() {
-//     var excludePattern = "(" + exclude.join(")|(") + ")";
-//     var pattern = `^.*require\\((["'])(${excludePattern})\\1\\).*$`;
-//     return gulp.src("build/**/*.js")
-//         // .pipe(replace(/^.*require\((["'`])[^.].*\1\).*$/gm, "")) //ignore external
-//         .pipe(replace(new RegExp(pattern, "gm"), ""))
-//         .pipe(gulp.dest("temp"))
-// })
-
-// gulp.task('pack-dispatch', ["pack-exclude"], function() {
-//     var names = fs.readdirSync("temp/app").filter(function(name) {
-//         var stats = fs.statSync(`temp/app/${name}`)
-//         return stats.isDirectory();
-//     });
-//     var dispatchTasks = names.map(function(name) {
-//         var path = `temp/app/${name}`;
-//         return gulp.src("temp/bundle.js")
-//             .pipe(gulp.dest(`temp/app/${name}`));
-//     })
-//     return merge(dispatchTasks);
-// })
-
-// gulp.task('pack', ["pack-dispatch"], function() {
-//     var names = fs.readdirSync("temp/app").filter(function(name) {
-//         var stats = fs.statSync(`temp/app/${name}`)
-//         return stats.isDirectory();
-//     });
-//     var packTasks = names.map(function(name) {
-//         var path = `temp/app/${name}/bundle.js`;
-//         var dest = `bundle/${name}`;
-//         var b = browserify(path);
-//         // b.pipeline.get('deps').push(require('through2').obj(
-//         //     function(row, enc, next) {
-//         //         console.log(row.file || row.id);
-//         //         next();
-//         //     }
-//         // ));
-//         return b.bundle()
-//             .pipe(source('bundle.js'))
-//             .pipe(buffer())
-//             .pipe(gulp.dest(dest));
-//     })
-//     return merge(packTasks);
-// });
-
-// gulp.task('post-clean', ["pack"], function() {
-//     return gulp.src("temp").pipe(path(del));
-// });
-
-// gulp.task("less", function() {
-//     return gulp.src("src/**/*.less")
-//         .pipe(less())
-//         .pipe(concatCss("bundle.css"))
-//         .pipe(gulp.dest("bundle"));
-// })
-
-// gulp.task("server-render", function() {
-//     return gulp.src("web/server-render.jsx")
-//         .pipe(jadeToJsx())
-//         .pipe(babel({ presets: ['react'] }))
-//         .pipe(rename({ extname: ".js" }))
-//         .pipe(gulp.dest("web/"));
-// })
-
-// gulp.task('watch', ["default"], function() {
-//     gulp.watch("src/**/*.js", ["src"]);
-//     gulp.watch("src/**/*.jsx", ["src"]);
-//     gulp.watch("src/**/*.less", ["less"]);
-// });
+gulp.task('watch', function() {
+    var src = ["src/**/*.js", "src/**/*.jsx", "src/**/*.less"];
+    gulp.watch(src, gulp.series(build, dist, dispatch, pack, clean));
+});
