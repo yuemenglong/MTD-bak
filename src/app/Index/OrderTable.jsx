@@ -4,7 +4,6 @@ var React = require("react");
 var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
 
-var Action = require("./action");
 var ordersAction = require("./reducer/orders").action;
 var Window = require("./busi/window");
 
@@ -18,7 +17,7 @@ function OrderTableClass() {
         order.closeTime = Window.endTime();
         order.closePrice = Window.endPrice();
         order.status = "CLOSE";
-        this.props.dispatch(Action.updateOrder(order));
+        this.props.dispatch(ordersAction.updateOrder(order));
         return false;
     }
     this.onDeleteClick = function(id) {
