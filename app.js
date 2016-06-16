@@ -4,14 +4,15 @@ var fs = require("fs");
 var bodyParser = require("body-parser");
 var Promise = require("bluebird");
 
+var loggerMiddleware = require("./web/middleware/logger");
 var orderService = require("./web/service/order");
 var Index = require("./dist/app/Index");
 
 var serverRender = require("./web/server-render");
 
 var app = express();
+app.use(loggerMiddleware());
 app.use(bodyParser.json());
-
 app.use('/bundle', express.static(__dirname + '/bundle'));
 app.use('/static', express.static(__dirname + '/static'));
 
