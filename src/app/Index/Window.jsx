@@ -19,13 +19,14 @@ function WindowClass() {
         $(document).keydown(function(e) {
             console.log(e.keyCode);
             if (e.keyCode === 39) {
-                dispatch({ type: "MOVE_NEXT" });
+                dispatch(dataAction.moveNext());
             } else if (e.keyCode === 37) {
                 dispatch({ type: "MOVE_PREV" });
             } else if (e.keyCode === 66) {
                 var order = {
                     type: "BUY",
                     volumn: 0.2,
+                    stopLoss: -0.01,
                 };
                 dispatch(ordersAction.sendOrder(order));
             }
