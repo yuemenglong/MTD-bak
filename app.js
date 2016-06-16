@@ -17,7 +17,13 @@ app.use('/static', express.static(__dirname + '/static'));
 
 app.get("/", function(req, res) {
     var tpl = fs.readFileSync(__dirname + "/web/jade/index.jade");
-    var html = jade.compile(tpl)();
+    var html = jade.compile(tpl, { filename: "./web/jade/index.jade" })();
+    res.end(html);
+})
+
+app.get("/test", function(req, res) {
+    var tpl = fs.readFileSync(__dirname + "/web/jade/test.jade");
+    var html = jade.compile(tpl, { filename: "./web/jade/test.jade" })();
     res.end(html);
 })
 

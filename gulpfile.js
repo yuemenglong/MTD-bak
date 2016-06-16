@@ -19,7 +19,7 @@ var merge = require('merge-stream');
 var through = require('through2');
 
 var prerequire = require("./tool/prerequire");
-var DebugPlugin= require("./tool/debug-plugin");
+var DebugPlugin = require("./tool/debug-plugin");
 var ExcludePlugin = require("./tool/exclude-plugin");
 var LessPlugin = require("./tool/less-plugin");
 
@@ -87,12 +87,15 @@ function clean() {
     return gulp.src("build").pipe(path(del));
 }
 
+var all = gulp.series(build, dist, dispatch, pack, clean);
+
 gulp.task("build", build);
 gulp.task("dist", dist);
 gulp.task("dispatch", dispatch);
 gulp.task("pack", pack);
 gulp.task("clean", clean);
-gulp.task("default", gulp.series(build, dist, dispatch, pack, clean));
+gulp.task("all", all);
+gulp.task("default", all);
 
 
 gulp.task("server-render", function() {
@@ -106,5 +109,5 @@ gulp.task("server-render", function() {
 
 gulp.task('watch', function() {
     var src = ["src/**/*.js", "src/**/*.jsx", "src/**/*.less"];
-    gulp.watch(src, gulp.series(build, dist, dispatch, pack, clean));
+    gulp.watch(src, all);
 });
