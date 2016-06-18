@@ -11,7 +11,7 @@ module.exports = function() {
         req.on("end", function() {
             var content = "";
             if (buf.length) {
-                buf.unshift("\n");
+                buf.unshift(new Buffer("\n"));
                 content = Buffer.concat(buf).toString();
             }
             logger.log(JSON.stringify(req.headers));
