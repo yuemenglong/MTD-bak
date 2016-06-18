@@ -39,6 +39,10 @@ service.listOrder = function() {
     return Order.select().then((orders) => orders.map(transDate));
 }
 
+service.delete = function(id) {
+    return Order.delete({ id: id });
+}
+
 function transDate(obj) {
     return _.mapValues(obj, o => _.isDate(o) ? moment(o).format("YYYY-MM-DD HH:mm:ss") : o);
 }
