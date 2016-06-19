@@ -3,6 +3,7 @@ var jade = require("jade");
 var fs = require("fs");
 var bodyParser = require("body-parser");
 var Promise = require("bluebird");
+var http = require("http");
 
 var orderService = require("./web/service/order");
 var Index = require("./dist/app/Index");
@@ -45,6 +46,25 @@ app.delete("/order/:id", function(req, res) {
         return orderService.delete(id);
     }).then(function() {
         res.end();
+    })
+})
+
+app.get("*", function(req, res) {
+    var backendReq = http.request({
+        host: "localhost",
+        port: 8080,
+        method: req.method,
+        headers: req.headers,
+    }, function(backendRes) {
+        if (req.xhr) {
+            res.writeHead(backendRes.statusCode, backendRes.headers);
+            backendRes.pipe(res);
+        }
+    })
+    req.pipe(backendReq);
+    // req.pipe(backendReq);
+    backendReq.on("error", function(err) {
+        console.error(err);
     })
 })
 
