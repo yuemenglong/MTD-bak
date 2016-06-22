@@ -5,7 +5,6 @@ var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
 
 var ordersAction = require("./reducer/orders").action;
-var Window = require("./busi/window");
 
 // orders[] 
 function OrderTableClass() {

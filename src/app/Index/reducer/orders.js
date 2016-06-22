@@ -96,14 +96,14 @@ function Action() {
             });
         }
     };
-    this.closeOrder = function(id) {
+    this.closeOrder = function(id, price) {
         return function(dispatch, getState) {
             var state = getState();
             var order = state.orders.filter(function(o) {
                 return o.id === id;
             })[0];
             order.closeTime = state.data.displayBars[0].datetime;
-            order.closePrice = state.data.displayBars[0].close;
+            order.closePrice = price || state.data.displayBars[0].close;
             order.status = "CLOSE";
             var json = JSON.stringify(order);
             $.post("/order/" + id, json, function(res) {

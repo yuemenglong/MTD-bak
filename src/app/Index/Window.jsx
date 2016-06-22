@@ -4,8 +4,6 @@ var ReactRedux = require("react-redux");
 var Provider = ReactRedux.Provider;
 var connect = ReactRedux.connect;
 
-var Bar = require("./busi/bar");
-var Order = require("./busi/order");
 var dataAction = require("./reducer/data").action;
 var ordersAction = require("./reducer/orders").action;
 
