@@ -9,42 +9,6 @@ var Provider = ReactRedux.Provider;
 
 var Svg = require("../../component/Svg");
 
-function getGridLines(gridWidth, gridHeight, windowWidth, windowHeight) {
-    var ret = [];
-    var style = { strokeDasharray: "3 3", stroke: "#FFF", strokeWidth: 0.5 };
-    //horizen
-    for (var i = 0; i < windowHeight; i += gridHeight) {
-        ret.push({ x1: 0, y1: i, x2: windowWidth, y2: i, style: style });
-    }
-    for (var i = 0; i < windowWidth; i += gridWidth) {
-        ret.push({ x1: i, y1: 0, x2: i, y2: windowHeight, style: style });
-    }
-    return ret;
-}
-
-function setRects(props, state) {
-    props.rects = state.displayBars.map(bar => bar.getRectCoord());
-}
-
-function setLines(props, state) {
-    var upperLines = state.displayBars.map(bar => bar.getUpperLineCoord());
-    var underLines = state.displayBars.map(bar => bar.getUnderLineCoord());
-    var gridLines = getGridLines(state.init.gridWidth, state.init.gridWidth, state.init.style.width, state.init.style.height);
-    var orderLines = _.flatten(state.displayOrders.map(order => order.getLinesCoord()));
-    props.lines = [].concat(upperLines).concat(underLines).concat(gridLines).concat(orderLines);
-}
-
-function setPaths(props, state) {
-    var ma = state.displayBars.map(bar => bar.getMACoord("ma30")).filter(o => !_.isNil(o));
-    props.paths = [{ points: ma, style: { stroke: '#c00', strokeWidth: '2', fill: 'none' } }];
-}
-
-function setTexts(props, state) {
-    if (!state.displayBars.length) return;
-    var text = moment(state.displayBars[0].datetime).format("YYYY-MM-DD HH:mm:ss");
-    props.texts = [{ x: 10, y: 30, text: text, style: { stroke: "#0f0", fill: "#0f0", fontSize: "30" } }];
-}
-
 // input:
 // bars[{open,high,low,close,x1,y1,x2,y2,ma30}] 
 // window{width, height, pos}
@@ -67,13 +31,15 @@ function mapStateToProps(state) {
 var BAR_STROKE_WIDTH = 0.8;
 var GRID = 32;
 
+function between(n, a, b) {
+    return Math.min(a, b) <= n && n <= Math.max(a, b);
+}
+
 function addOrders(orders, displayBars, wnd, props) {
     if (!wnd.startTime || !wnd.endTime) return;
     orders.map(function(o) {
-        if (o.closeTime &&
-            ((wnd.startTime <= o.openTime && o.openTime <= wnd.endTime) ||
-                (wnd.startTime <= o.closeTime && o.closeTime <= wnd.endTime)
-            )) {
+        if (o.closeTime && between(o.openTime, wnd.startTime, wnd.endTime) ||
+            o.closeTime && between(o.closeTime, wnd.startTime, wnd.endTime)) {
             //1. 已经成交且时间与窗口有重合
             var startBar = getBarByTime(displayBars, o.openTime);
             var endBar = getBarByTime(displayBars, o.closeTime);
@@ -89,8 +55,14 @@ function addOrders(orders, displayBars, wnd, props) {
             //2. 未成交但是挂单时间在窗口之前
             var style = { stroke: "#0f0", strokeDasharray: "5,5" }
             var y = getY(wnd, o.price);
-            var key = `create-${o.id}`;
+            var key = `price-${o.id}`;
             props.lines.push({ x1: 0, y1: y, x2: wnd.width, y2: y, style: style, key: key });
+            if (o.stopLoss) {
+                var style = { stroke: "#c00", strokeDasharray: "5,5" }
+                var y = getY(wnd, o.stopLoss);
+                var key = `sl-${o.id}`;
+                props.lines.push({ x1: 0, y1: y, x2: wnd.width, y2: y, style: style, key: key });
+            }
         }
     })
 }

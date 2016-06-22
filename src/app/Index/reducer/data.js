@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var ordersAction = require("./orders").action;
 
 var BAR_WIDTH = 4;
 var BAR_GAP = 4;
@@ -91,6 +92,12 @@ function Action() {
                 dispatch({ type: "FETCH_DATA_SUCC", data: json });
             })
         };
+    }
+    this.moveNext = function() {
+        return function(dispatch, getState) {
+            dispatch({ type: "MOVE_NEXT" });
+            dispatch(ordersAction.checkOrders(getState().data.displayBars[0]));
+        }
     }
 }
 
