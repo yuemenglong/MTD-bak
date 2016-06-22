@@ -19,14 +19,14 @@ app.use('/bundle', express.static(__dirname + '/bundle'));
 app.use('/static', express.static(__dirname + '/static'));
 
 app.get("/", function(req, res) {
-    var tpl = fs.readFileSync(__dirname + "/web/jade/index.jade");
-    var html = jade.compile(tpl, { filename: "./web/jade/index.jade" })();
+    var tpl = fs.readFileSync(__dirname + "/web/jade/Index.jade");
+    var html = jade.compile(tpl)();
     res.end(html);
 })
 
 app.get("/test", function(req, res) {
-    var tpl = fs.readFileSync(__dirname + "/web/jade/test.jade");
-    var html = jade.compile(tpl, { filename: "./web/jade/test.jade" })();
+    var tpl = fs.readFileSync(__dirname + "/web/jade/Test.jade");
+    var html = jade.compile(tpl)();
     res.end(html);
 })
 
@@ -56,24 +56,24 @@ app.delete("/order/:id", function(req, res) {
     })
 })
 
-app.get("*", function(req, res) {
-    var backendReq = http.request({
-        host: "localhost",
-        port: 8080,
-        method: req.method,
-        headers: req.headers,
-    }, function(backendRes) {
-        if (req.xhr) {
-            res.writeHead(backendRes.statusCode, backendRes.headers);
-            backendRes.pipe(res);
-        }
-    })
-    req.pipe(backendReq);
-    // req.pipe(backendReq);
-    backendReq.on("error", function(err) {
-        console.error(err);
-    })
-})
+// app.get("*", function(req, res) {
+//     var backendReq = http.request({
+//         host: "localhost",
+//         port: 8080,
+//         method: req.method,
+//         headers: req.headers,
+//     }, function(backendRes) {
+//         if (req.xhr) {
+//             res.writeHead(backendRes.statusCode, backendRes.headers);
+//             backendRes.pipe(res);
+//         }
+//     })
+//     req.pipe(backendReq);
+//     // req.pipe(backendReq);
+//     backendReq.on("error", function(err) {
+//         console.error(err);
+//     })
+// })
 
 app.listen(80, function(err) {
     if (err) {

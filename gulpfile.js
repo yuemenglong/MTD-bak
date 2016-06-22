@@ -22,13 +22,30 @@ var prerequire = require("./tool/prerequire");
 var DebugPlugin = require("./tool/debug-plugin");
 var ExcludePlugin = require("./tool/exclude-plugin");
 var LessPlugin = require("./tool/less-plugin");
+var JadePlugin = require("./tool/jade-plugin");
 
 var exclude = ["react", "react-dom", "redux", "react-redux",
     "lodash", "bluebird", "moment",
     "isomorphic-fetch", "events",
 ];
 
+var requireMap = {
+    "react": "http://cdn.bootcss.com/react/0.14.7/react.js",
+    "react-dom": "http://cdn.bootcss.com/react/0.14.7/react-dom.js",
+    "redux": "http://cdn.bootcss.com/redux/3.5.2/redux.js",
+    "react-redux": "http://cdn.bootcss.com/react-redux/4.4.5/react-redux.js",
+    "lodash": "http://cdn.bootcss.com/lodash.js/4.12.0/lodash.min.js",
+    "bluebird": "http://cdn.bootcss.com/bluebird/3.3.5/bluebird.min.js",
+    "fetch": "http://cdn.bootcss.com/fetch/1.0.0/fetch.min.js",
+    "moment": "http://cdn.bootcss.com/moment.js/2.13.0/moment.min.js",
+    "events": "http://cdn.bootcss.com/EventEmitter/5.0.0/EventEmitter.min.js",
+    "chosen": "http://cdn.bootcss.com/chosen/1.5.1/chosen.jquery.min.js",
+    "redux-thunk": "",
+    "react-addons-update": "",
+}
+
 var assets = [".*\\.less"];
+var frontend = ["chosen"];
 
 var apps = fs.readdirSync("src/app").filter(function(name) {
     var stats = fs.statSync(`src/app/${name}`)
@@ -47,7 +64,7 @@ function build() {
 
 function dist() {
     var pre = prerequire();
-    var ep = new ExcludePlugin(assets);
+    var ep = new ExcludePlugin(assets.concat(frontend));
     pre.plugin(ep);
     return gulp.src("build/**/*.js")
         .pipe(pre())
@@ -64,23 +81,26 @@ function dispatch() {
 
 function pack() {
     var lessTasks = [];
+    var jadeTasks = [];
     var packTasks = apps.map(function(name) {
         var b = browserify(`build/app/${name}/bundle.js`);
         var pre = prerequire.transform(b);
-        var dp = new DebugPlugin();
-        var ep = new ExcludePlugin(exclude);
+        var jp = new JadePlugin(requireMap, name, `${name}.jade`);
+        // var ep = new ExcludePlugin(exclude);
         var lp = new LessPlugin("bundle.css");
-        pre.plugin(dp);
-        pre.plugin(ep);
+        pre.plugin(jp);
+        // pre.plugin(ep);
         pre.plugin(lp);
-        var lessTask = lp.pipe(gulp.dest(`bundle/${name}`));
-        lessTasks.push(lessTask);
+        // var lessTask = lp.pipe(gulp.dest(`bundle/${name}`));
+        var jadeTask = jp.pipe(gulp.dest("web/jade"));
+        jadeTasks.push(jadeTask);
+        // lessTasks.push(lessTask);
         return b.bundle()
             .pipe(source("bundle.js"))
             .pipe(buffer())
             .pipe(gulp.dest(`bundle/${name}`))
     })
-    return merge(packTasks.concat(lessTasks));
+    return merge(packTasks.concat(jadeTasks));
 }
 
 function clean() {
