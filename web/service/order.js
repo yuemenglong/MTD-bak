@@ -2,6 +2,7 @@ var _ = require("lodash");
 var orm = require("yy-orm");
 var uuid = require("node-uuid");
 var moment = require("moment");
+var Promise = require("bluebird");
 var type = orm.type;
 var cond = orm.cond;
 var db = orm.create({ host: 'localhost', user: 'root', password: 'root', database: 'test' })
@@ -32,7 +33,10 @@ service.sendOrder = function(order) {
 }
 
 service.updateOrder = function(order) {
-    return Order.update(order);
+    var orders = _.flatten([order]);
+    return Promise.all(orders.map(function(order) {
+        return Order.update(order);
+    }))
 }
 
 service.listOrder = function() {

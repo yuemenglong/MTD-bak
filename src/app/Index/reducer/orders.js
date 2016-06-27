@@ -26,13 +26,7 @@ function reducer(state, action) {
             var order = action.order;
             return update(state, { $push: [order] });
         case "CLOSE_ORDER_SUCC":
-            var order = action.order;
-            var idx = _.findIndex(state, function(o) {
-                return o.id === order.id;
-            })
-            var cond = {};
-            cond[idx] = { $set: order };
-            return update(state, cond);
+            return updateOrder(action.order, state);
         case "DELETE_ORDER_SUCC":
             var id = action.id;
             var idx = _.findIndex(state, function(o) {
@@ -46,6 +40,26 @@ function reducer(state, action) {
         default:
             return state;
     }
+}
+
+function between(n, a, b) {
+    return Math.min(a, b) <= n && n <= Math.max(a, b);
+}
+
+function updateOrder(orders, state) {
+    orders = _.flatten([orders]);
+    var ids = orders.map(function(o) {
+        return o.id;
+    });
+    ids.forEach(function(id, i) {
+        var idx = _.findIndex(state, function(o) {
+            return o.id === id;
+        })
+        var cond = {};
+        cond[idx] = { $set: orders[i] };
+        state = update(state, cond);
+    });
+    return state;
 }
 
 function Action() {
@@ -64,6 +78,9 @@ function Action() {
             var wnd = getState().data.window;
             if (order.type === "BUY" || order.type === "SELL") {
                 var bar = getState().data.displayBars[0];
+                if (order.stopLoss && order.stopLoss < 0) {
+                    order.stopLoss += bar.close;
+                }
                 _.merge(order, {
                     price: bar.close,
                     openPrice: bar.close,
@@ -94,11 +111,6 @@ function Action() {
             });
         }
     }
-    this.updateOrder = function(order) {
-        return function(dispatch, getState) {
-
-        }
-    }
     this.deleteOrder = function(id) {
         return function(dispatch, getState) {
             var opt = {
@@ -108,6 +120,34 @@ function Action() {
                 }
             };
             $.ajax("/order/" + id, opt);
+        }
+    }
+    this.checkOrders = function(bar) {
+        return function(dispatch, getState) {
+            var orders = getState().orders;
+            var closeOrders = orders.filter(function(o) {
+                return o.status === "OPEN" && between(o.stopLoss, bar.high, bar.low);
+            }).map(function(o) {
+                o.status = "CLOSE";
+                o.closePrice = o.stopLoss;
+                o.closeTime = bar.datetime;
+                return o;
+            })
+            if (!closeOrders.length) {
+                return;
+            }
+            var ids = closeOrders.map(function(o) {
+                return o.id;
+            }).join(",");
+            var json = JSON.stringify(orders);
+            $.post("/order/" + ids, json, function(res) {
+                dispatch({
+                    type: "CLOSE_ORDER_SUCC",
+                    order: res.map(function(o) {
+                        return new Order(o);
+                    })
+                });
+            });
         }
     }
 }
