@@ -73,6 +73,13 @@ function addBars(bars, wnd, props) {
         props.lines.push(getUpperLine(wnd, bar));
         props.lines.push(getUnderLine(wnd, bar));
     })
+    var ma = bars.map(function(bar) {
+        return getMa(wnd, bar);
+    }).filter(function(o) {
+        return !_.isNil(o);
+    });
+    var maStyle = { stroke: '#c00', strokeWidth: '2', fill: 'none' }
+    props.paths.push({ points: ma, style: maStyle });
 }
 
 function addGrid(props) {
@@ -120,6 +127,15 @@ function getUnderLine(wnd, bar) {
     var y2 = getY(wnd, bar.y1);
     var style = { stroke: "#000", strokeWidth: BAR_STROKE_WIDTH };
     return { x1: x1, y1: y1, x2: x2, y2: y2, style: style };
+}
+
+function getMa(wnd, bar) {
+    if (!bar.ma30) {
+        return;
+    }
+    var x = getX(wnd, (bar.x1 + bar.x2) / 2);
+    var y = getY(wnd, bar.ma30);
+    return { x: x, y: y };
 }
 
 function getBarByTime(bars, datetime, from, to) {
