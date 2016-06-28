@@ -56,25 +56,6 @@ app.delete("/order/:id", function(req, res) {
     })
 })
 
-// app.get("*", function(req, res) {
-//     var backendReq = http.request({
-//         host: "localhost",
-//         port: 8080,
-//         method: req.method,
-//         headers: req.headers,
-//     }, function(backendRes) {
-//         if (req.xhr) {
-//             res.writeHead(backendRes.statusCode, backendRes.headers);
-//             backendRes.pipe(res);
-//         }
-//     })
-//     req.pipe(backendReq);
-//     // req.pipe(backendReq);
-//     backendReq.on("error", function(err) {
-//         console.error(err);
-//     })
-// })
-
 app.listen(80, function(err) {
     if (err) {
         console.log("Start Fail !!!");
