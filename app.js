@@ -72,3 +72,47 @@ app.listen(80, function(err) {
         console.log("Start Succ ...");
     }
 });
+
+
+function transparent(req, res) {
+    var reqBuf = [];
+    var resBuf = [];
+    var options = {
+        hostname: '172.16.17.222',
+        port: 8081,
+        path: req.originalUrl,
+        method: req.method,
+        headers: req.headers,
+    };
+    var backendReq = http.request(options, function(backendRes) {
+        backendRes.on("data", function(data) {
+            resBuf.push(data);
+        })
+        backendRes.on("end", function() {
+            var ret = resBuf.join("");
+            var body = ret.length ? "\n" + ret : "";
+            var info = util.format("[%s] [%d] %s%s", req.method.toUpperCase(), backendRes.statusCode, req.originalUrl, body);
+            if (backendRes.statusCode !== 200) {
+                logger.error(info);
+            } else {
+                logger.info("[%s] [%d] %s%s", req.method.toUpperCase(), backendRes.statusCode, req.originalUrl, body)
+            }
+            if (req.xhr) {
+                res.writeHead(backendRes.statusCode, backendRes.headers);
+                return res.end(ret);
+            }
+            var mv = JSON.parse(ret);
+            res.render(mv.view, { init: mv.model });
+        });
+    });
+    // req.pipe(backendReq);
+    req.on("data", function(data) {
+        reqBuf.push(data);
+        backendReq.write(data);
+    })
+    req.on("end", function() {
+        var body = reqBuf.length ? "\n" + reqBuf.join("") : "";
+        logger.info("[%s] %s%s", req.method.toUpperCase(), req.originalUrl, body)
+        backendReq.end();
+    })
+}
