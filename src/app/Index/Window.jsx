@@ -9,6 +9,7 @@ var ordersAction = require("./reducer/orders").action;
 
 var Svg = require("./Svg");
 var OrderTable = require("./OrderTable");
+var AccountOperate = require("./AccountOperate");
 
 function WindowClass() {
     this.componentDidMount = function() {
@@ -38,6 +39,7 @@ function WindowClass() {
         return jade(`
             div
                 Svg
+                AccountOperate
                 OrderTable`);
     }
 }

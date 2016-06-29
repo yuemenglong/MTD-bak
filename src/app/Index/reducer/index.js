@@ -5,5 +5,6 @@ var combineReducers = Redux.combineReducers;
 // var displayOrders = require("./displayOrders");
 var data = require("./data");
 var orders = require("./orders");
+var account = require("./account");
 
-module.exports = combineReducers({ data, orders });
+module.exports = combineReducers({ data, orders, account });

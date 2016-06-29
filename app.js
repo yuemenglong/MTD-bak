@@ -4,6 +4,7 @@ var fs = require("fs");
 var bodyParser = require("body-parser");
 var Promise = require("bluebird");
 var http = require("http");
+var morgan = require("morgan")
 
 var loggerMiddleware = require("./web/middleware/logger");
 var orderService = require("./web/service/order");
@@ -14,7 +15,8 @@ var loggerMiddleware = require("./web/middleware/logger");
 
 var app = express();
 app.use(loggerMiddleware());
-app.use(bodyParser.json());
+// app.use(morgan("combined"));
+// app.use(bodyParser.json());
 app.use('/bundle', express.static(__dirname + '/bundle'));
 app.use('/static', express.static(__dirname + '/static'));
 
@@ -22,6 +24,13 @@ app.get("/", function(req, res) {
     var tpl = fs.readFileSync(__dirname + "/web/jade/Index.jade");
     var html = jade.compile(tpl)();
     res.end(html);
+})
+
+app.post("/", function(req, res) {
+    req.on("data", function(data) {
+        console.log(data.toString());
+    })
+    res.end();
 })
 
 app.get("/test", function(req, res) {
