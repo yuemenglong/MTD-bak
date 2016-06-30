@@ -5,7 +5,6 @@ var fs = require("fs");
 var bodyParser = require("body-parser");
 var Promise = require("bluebird");
 var http = require("http");
-var morgan = require("morgan")
 var logger = require("yy-logger");
 
 var transmit = require("./web/middleware/transmit");
@@ -74,7 +73,10 @@ app.delete("/order/:id", function(req, res) {
 
 var trans = transmit("127.0.0.1", 8080);
 app.get("/account", trans);
+app.get("/account/:id", trans);
+app.get("/account/:id/order", trans);
 app.post("/account", trans);
+app.post("/account/:id/order", trans);
 app.delete("/account/:id", trans);
 
 app.listen(80, function(err) {

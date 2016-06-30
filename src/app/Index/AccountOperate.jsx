@@ -10,33 +10,40 @@ var accountAction = require("./reducer/account").action;
 
 function renderSelectAccount() {
     var that = this;
-    return jade("select", function() {
+    return jade("select(onChange={this.onSelectAccount} value={this.props.current.id})", function() {
         var ret = that.props.accounts.map(function(account) {
             return jade("option(value={account.id} key={account.id}) {account.name}");
         })
-        ret.unshift(jade("option(key='none') 请选择"));
+        ret.unshift(jade("option(key='') 请选择"));
         return ret;
     })
 }
 
 function AccountOperateClass() {
     this.renderSelectAccount = renderSelectAccount;
-    this.addAccount = function() {
-        this.props.dispatch(accountAction.addAccount());
-    }
     this.getDefaultProps = function() {
         return { accounts: [], current: { name: "", balance: 0 } };
     }
-    this.onChangeAccount = function(e) {
-        this.props.dispatch(accountAction.changeAccount(e.target.name, e.target.value));
+    this.onAddAccount = function() {
+        this.props.dispatch(accountAction.addAccount());
+    }
+    this.onUpdateAccount = function(e) {
+        this.props.dispatch(accountAction.updateAccount(e.target.name, e.target.value));
+    }
+    this.onDeleteAccount = function(e) {
+        this.props.dispatch(accountAction.deleteAccount(this.props.current.id));
+    }
+    this.onSelectAccount = function(e) {
+        this.props.dispatch(accountAction.selectAccount(e.target.value));
     }
     this.render = function() {
         return jade(`
             div
-                input(type="text" name="name" placeholder="账户名称" value={this.props.current.name} onChange={this.onChangeAccount})
-                input(type="text" name="balance" placeholder="账户资金" value={this.props.current.balance} onChange={this.onChangeAccount})
-                a(href="javascript:void(0)" onClick={this.addAccount}) 添加
+                input(type="text" name="name" placeholder="账户名称" value={this.props.current.name} onChange={this.onUpdateAccount})
+                input(type="text" name="balance" placeholder="账户资金" value={this.props.current.balance} onChange={this.onUpdateAccount})
+                a(href="javascript:void(0)" onClick={this.onAddAccount}) 添加
                 |{this.renderSelectAccount()}
+                a(href="javascript:void(0)" onClick={this.onDeleteAccount}) 删除
             `);
     }
 }

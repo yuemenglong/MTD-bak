@@ -1,5 +1,6 @@
 var _ = require("lodash");
 var update = require('react-addons-update');
+var ordersAction = require("./orders").action;
 
 function Order(order) {
     _.merge(this, order)
@@ -18,15 +19,27 @@ function reducer(state, action) {
     state = state || { accounts: [], current: {} };
     state = _.cloneDeep(state);
     switch (action.type) {
-        case "GET_ACCOUNTS_SUCC":
+        case "FETCH_ACCOUNTS_SUCC":
             state.accounts = action.accounts;
             return state;
-        case "CHANGE_ACCOUNT":
+        case "UPDATE_ACCOUNT":
             state.current[action.name] = action.value;
             return state;
         case "ADD_ACCOUNT_SUCC":
-            state.current = {};
+            state.current = _.clone(action.account);
             state.accounts.push(action.account);
+            return state;
+        case "SELECT_ACCOUNT":
+            var account = state.accounts.filter(function(o) {
+                return o.id == action.id;
+            })[0];
+            state.current = account ? _.clone(account) : {};
+            return state;
+        case "DELETE_ACCOUNT_SUCC":
+            state.accounts = _.dropWhile(state.accounts, function(o) {
+                return o.id == action.id;
+            });
+            state.current = {};
             return state;
         default:
             return state;
@@ -34,16 +47,16 @@ function reducer(state, action) {
 }
 
 function Action() {
-    this.changeAccount = function(name, value) {
-        return { type: "CHANGE_ACCOUNT", name: name, value: value };
+    this.updateAccount = function(name, value) {
+        return { type: "UPDATE_ACCOUNT", name: name, value: value };
     }
-    this.getAccounts = function() {
+    this.fetchAccounts = function() {
         return function(dispatch, getState) {
             $.ajax({
                 url: "/account",
                 type: "GET",
                 success: function(res) {
-                    dispatch({ type: "GET_ACCOUNTS_SUCC", accounts: res });
+                    dispatch({ type: "FETCH_ACCOUNTS_SUCC", accounts: res });
                 }
             })
         }
@@ -56,6 +69,24 @@ function Action() {
                 type: "POST",
                 success: function(res) {
                     dispatch({ type: "ADD_ACCOUNT_SUCC", account: res });
+                }
+            })
+        }
+    }
+    this.selectAccount = function(id) {
+        return function(dispatch, getState) {
+            dispatch({ type: "SELECT_ACCOUNT", id: id });
+            dispatch(ordersAction.fetchOrders());
+        }
+    }
+    this.deleteAccount = function(id) {
+        return function(dispatch, getState) {
+            if (!id) return;
+            $.ajax({
+                url: "/account/" + id,
+                type: "DELETE",
+                success: function(res) {
+                    dispatch({ type: "DELETE_ACCOUNT_SUCC", id: id });
                 }
             })
         }

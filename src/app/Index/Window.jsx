@@ -17,7 +17,7 @@ function WindowClass() {
         var dispatch = this.props.dispatch;
         $.ajaxSetup({ contentType: "application/json; charset=utf-8" });
         $(document).keydown(function(e) {
-            console.log(e.keyCode);
+            // console.log(e.keyCode);
             if (e.keyCode === 39) {
                 dispatch(dataAction.moveNext());
             } else if (e.keyCode === 37) {
@@ -33,7 +33,8 @@ function WindowClass() {
         })
         $(document).ready(function() {
             dispatch(dataAction.fetchData());
-            dispatch(ordersAction.fetchOrder());
+            dispatch(ordersAction.fetchOrders());
+            dispatch(accountAction.fetchAccounts());
         })
     }
     this.render = function() {

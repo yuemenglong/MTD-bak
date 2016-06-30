@@ -63,18 +63,27 @@ function updateOrder(orders, state) {
 }
 
 function Action() {
-    this.fetchOrder = function() {
+    this.fetchOrders = function() {
         return function(dispatch, getState) {
-            fetch("/order").then(function(res) {
-                return res.json();
-            }).then(function(json) {
-                dispatch({ type: "FETCH_ORDER_SUCC", orders: json })
-            })
+            var id = getState().account.current.id;
+            if (!id) {
+                dispatch({ type: "FETCH_ORDER_SUCC", orders: [] });
+                return;
+            }
+            $.ajax({
+                url: "/account/" + id + "/order",
+                type: "GET",
+                success: function(res) {
+                    dispatch({ type: "FETCH_ORDER_SUCC", orders: res });
+                }
+            });
         }
     }
     this.sendOrder = function(order) {
         //{type, volumn}
         return function(dispatch, getState) {
+            var id = getState().account.current.id;
+            if (!id) return;
             var wnd = getState().data.window;
             if (order.type === "BUY" || order.type === "SELL") {
                 var bar = getState().data.displayBars[0];
@@ -91,7 +100,7 @@ function Action() {
             }
             order = new Order(order);
             var json = JSON.stringify(order);
-            $.post("/order", json, function(res) {
+            $.post("/account/" + id + "/order", json, function(res) {
                 dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
             });
         }
