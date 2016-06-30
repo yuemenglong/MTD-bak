@@ -6,6 +6,7 @@ var connect = ReactRedux.connect;
 
 var dataAction = require("./reducer/data").action;
 var ordersAction = require("./reducer/orders").action;
+var accountAction = require("./reducer/account").action;
 
 var Svg = require("./Svg");
 var OrderTable = require("./OrderTable");

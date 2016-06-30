@@ -15,13 +15,18 @@ Order.prototype.toJSON = function() {
 }
 
 function reducer(state, action) {
-    state = state || { list: [], current: { name: "", balance: 0 } };
+    state = state || { accounts: [], current: {} };
     state = _.cloneDeep(state);
     switch (action.type) {
+        case "GET_ACCOUNTS_SUCC":
+            state.accounts = action.accounts;
+            return state;
         case "CHANGE_ACCOUNT":
             state.current[action.name] = action.value;
             return state;
         case "ADD_ACCOUNT_SUCC":
+            state.current = {};
+            state.accounts.push(action.account);
             return state;
         default:
             return state;
@@ -32,20 +37,25 @@ function Action() {
     this.changeAccount = function(name, value) {
         return { type: "CHANGE_ACCOUNT", name: name, value: value };
     }
+    this.getAccounts = function() {
+        return function(dispatch, getState) {
+            $.ajax({
+                url: "/account",
+                type: "GET",
+                success: function(res) {
+                    dispatch({ type: "GET_ACCOUNTS_SUCC", accounts: res });
+                }
+            })
+        }
+    }
     this.addAccount = function() {
         return function(dispatch, getState) {
-            // $.post("/", "{}", function() {
-            //     console.log("addAccount");
-            // })
             $.ajax({
                 url: "/account",
                 data: JSON.stringify(getState().account.current),
                 type: "POST",
                 success: function(res) {
-                    console.log(res);
-                },
-                error: function(err) {
-                    console.log(err);
+                    dispatch({ type: "ADD_ACCOUNT_SUCC", account: res });
                 }
             })
         }
