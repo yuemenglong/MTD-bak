@@ -8,7 +8,7 @@ var http = require("http");
 var logger = require("yy-logger");
 
 var transmit = require("./web/middleware/transmit");
-var orderService = require("./web/service/order");
+// var orderService = require("./web/service/order");
 
 var serverRender = require("./web/server-render");
 
@@ -45,39 +45,16 @@ app.get("/test", function(req, res) {
     res.end(html);
 })
 
-app.post("/order", function(req, res) {
-    var order = req.body;
-    Promise.try(() => orderService.sendOrder(order))
-        .then((order) => res.json(order));
-})
-
-app.post("/order/:id", function(req, res) {
-    var order = req.body;
-    Promise.try(() => orderService.updateOrder(order))
-        .then(() => res.json(order));
-})
-
-app.get("/order", function(req, res) {
-    Promise.try(() => orderService.listOrder())
-        .then((orders) => res.json(orders));
-})
-
-app.delete("/order/:id", function(req, res) {
-    var id = req.params.id;
-    Promise.try(function() {
-        return orderService.delete(id);
-    }).then(function() {
-        res.end();
-    })
-})
-
 var trans = transmit("127.0.0.1", 8080);
 app.get("/account", trans);
 app.get("/account/:id", trans);
 app.get("/account/:id/order", trans);
 app.post("/account", trans);
-app.post("/account/:id/order", trans);
 app.delete("/account/:id", trans);
+
+app.post("/account/:id/order", trans);
+app.put("/account/:id/order/:orderId", trans);
+app.delete("/account/:id/order/:orderId", trans);
 
 app.listen(80, function(err) {
     if (err) {

@@ -115,20 +115,26 @@ function Action() {
             order.closePrice = price || state.data.displayBars[0].close;
             order.status = "CLOSE";
             var json = JSON.stringify(order);
-            $.post("/order/" + id, json, function(res) {
-                dispatch({ type: "CLOSE_ORDER_SUCC", order: new Order(res) });
-            });
+            // $.post("/order/" + id, json, function(res) {});
+            $.ajax({
+                url: "/account/0/order/" + id,
+                method: "PUT",
+                data: json,
+                success: function(res) {
+                    dispatch({ type: "CLOSE_ORDER_SUCC", order: new Order(res) });
+                }
+            })
         }
     }
     this.deleteOrder = function(id) {
         return function(dispatch, getState) {
-            var opt = {
+            $.ajax({
+                url: "/account/0/order/" + id,
                 method: "DELETE",
                 success: function() {
                     dispatch({ type: "DELETE_ORDER_SUCC", id: id })
                 }
-            };
-            $.ajax("/order/" + id, opt);
+            });
         }
     }
     this.checkOrders = function(bar) {
@@ -148,15 +154,23 @@ function Action() {
             var ids = closeOrders.map(function(o) {
                 return o.id;
             }).join(",");
-            var json = JSON.stringify(orders);
-            $.post("/order/" + ids, json, function(res) {
-                dispatch({
-                    type: "CLOSE_ORDER_SUCC",
-                    order: res.map(function(o) {
-                        return new Order(o);
-                    })
-                });
+            var json = JSON.stringify(closeOrders);
+            $.ajax({
+                url: "/account/0/order/",
+                method: "PUT",
+                data: json,
+                success: function(res) {
+                    dispatch({ type: "CLOSE_ORDER_SUCC", order: new Order(res) });
+                }
             });
+            // $.post("/order/" + ids, json, function(res) {
+            //     dispatch({
+            //         type: "CLOSE_ORDER_SUCC",
+            //         order: res.map(function(o) {
+            //             return new Order(o);
+            //         })
+            //     });
+            // });
         }
     }
 }
