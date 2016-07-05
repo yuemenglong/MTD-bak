@@ -3,7 +3,7 @@ var http = require("http");
 var logger = require("yy-logger");
 
 function transmit(host, port) {
-    return function(req, res) {
+    function handler(req, res) {
         function errorHandler(err) {
             logger.error(err);
             res.status(500).end(JSON.stringify(err));
@@ -49,9 +49,61 @@ function transmit(host, port) {
             backendReq.end();
         })
         req.on("error", errorHandler);
+        res.on("error", errorHandler);
         backendReq.on("error", errorHandler);
-
     }
+
+    var _get = [];
+    var _post = [];
+    var _put = [];
+    var _delete = [];
+
+    var methodMap = {}
+
+    function mergeRegex(arr) {
+        if (!arr.length) {
+            return;
+        }
+        var buf = arr.join(")|(");
+        buf = `(${buf})`;
+        return new RegExp(buf);
+    }
+
+    function normalizeUrl(url) {
+        return url.replace("/", "\\/").replace(/:[^/]*/g, "[^/]*");
+    }
+
+    function ret(req, res, next) {
+        var method = req.method;
+        if (!methodMap[method]) {
+            return next();
+        }
+        if (!methodMap[method].test(req.path)) {
+            return next();
+        }
+        return handler(req, res);
+    }
+    ret.get = function(url) {
+        url = normalizeUrl(url);
+        _get.push(url);
+        methodMap.GET = mergeRegex(_get);
+    }
+    ret.post = function(url) {
+        url = normalizeUrl(url);
+        _post.push(url);
+        methodMap.POST = mergeRegex(_post);
+    }
+    ret.put = function(url) {
+        url = normalizeUrl(url);
+        _put.push(url);
+        methodMap.PUT = mergeRegex(_put);
+    }
+    ret.delete = function(url) {
+        url = normalizeUrl(url);
+        _delete.push(url);
+        methodMap.DELETE = mergeRegex(_delete);
+    }
+    return ret;
 }
 
 module.exports = transmit;

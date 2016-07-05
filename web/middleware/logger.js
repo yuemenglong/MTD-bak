@@ -8,10 +8,8 @@ module.exports = function() {
         })
         req.on("end", function() {
             var content = Buffer.concat(buf).toString();
-            logger.log("[%s] %s", req.method.toUpperCase(), req.originalUrl);
-            if (content.length) {
-                logger.log(content);
-            }
+            content = content.length ? "\n" + content : "";
+            logger.log("[%s] %s%s", req.method.toUpperCase(), req.originalUrl, content);
         })
         req.on("error", function(err) {
             logger.error(err);
