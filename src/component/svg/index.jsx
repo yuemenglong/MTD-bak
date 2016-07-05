@@ -41,9 +41,9 @@ var SvgClass = function() {
     this.render = function() {
         var that = this;
         var dft = { lines: [], rects: [], paths: [], texts: [] };
-        var style = this.props.style;
+        // var style = this.props.style;
         var props = Object.assign(dft, this.props);
-        return jade(`svg(style={style}) #{}#{}#{}#{}`, function() {
+        return jade(`svg({...this.props}) #{}#{}#{}#{}`, function() {
             return props.lines.map(that.renderLine);
         }, function() {
             return props.rects.map(that.renderRect);

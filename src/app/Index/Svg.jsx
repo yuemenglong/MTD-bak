@@ -159,4 +159,18 @@ function getBarByTime(bars, datetime, from, to) {
     }
 }
 
-module.exports = connect(mapStateToProps)(Svg);
+function SvgClass() {
+    this.onMouseMove = function(e) {
+        var pos = $(this.getDOMNode()).offset()
+        var rel = {
+            x: e.pageX - pos.left,
+            y: e.pageY - pos.top
+        }
+        console.log(rel);
+    }
+    this.render = function() {
+        return jade("Svg({...this.props} onMouseMove={this.onMouseMove})");
+    }
+}
+
+module.exports = connect(mapStateToProps)(React.createClass(new SvgClass()));
