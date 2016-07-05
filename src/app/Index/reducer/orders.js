@@ -14,8 +14,20 @@ Order.prototype.toJSON = function() {
     return order;
 }
 
+Order.prototype.getProfit = function() {
+    var profit = 0;
+    if (this.type === "BUY") {
+        profit = (this.closePrice - this.openPrice) * this.volumn * 100000;
+    } else if (this.type === "SELL") {
+        profit = (this.openPrice - this.closePrice) * this.volumn * 100000;
+    }
+    profit = _.round(profit, 2);
+    return profit;
+}
+
 function reducer(state, action) {
     state = state || [];
+    state = _.cloneDeep(state);
     switch (action.type) {
         case "FETCH_ORDER_SUCC":
             var orders = action.orders.map(function(o) {
@@ -24,19 +36,32 @@ function reducer(state, action) {
             return orders;
         case "SEND_ORDER_SUCC":
             var order = action.order;
-            return update(state, { $push: [order] });
+            state.push(order);
+            return state;
         case "CLOSE_ORDER_SUCC":
-            return updateOrder(action.order, state);
-        case "DELETE_ORDER_SUCC":
-            var id = action.id;
-            var idx = _.findIndex(state, function(o) {
-                return o.id === id;
+            state = state.map(function(o) {
+                if (o.id == action.order.id) {
+                    return action.order;
+                }
+                return o;
             })
-            return update(state, {
-                $splice: [
-                    [idx, 1]
-                ]
-            });
+            return state;
+        case "CLOSE_ORDERS_SUCC":
+            var ordersMap = _.fromPairs(action.orders.map(function(o) {
+                return [o.id, o];
+            }));
+            state = state.map(function(o) {
+                if (ordersMap[o.id]) {
+                    return ordersMap[o.id];
+                }
+                return o;
+            })
+            return state;
+        case "DELETE_ORDER_SUCC":
+            state = state.filter(function(o) {
+                return o.id != action.id;
+            })
+            return state;
         default:
             return state;
     }
@@ -46,20 +71,11 @@ function between(n, a, b) {
     return Math.min(a, b) <= n && n <= Math.max(a, b);
 }
 
-function updateOrder(orders, state) {
-    orders = _.flatten([orders]);
-    var ids = orders.map(function(o) {
-        return o.id;
-    });
-    ids.forEach(function(id, i) {
-        var idx = _.findIndex(state, function(o) {
-            return o.id === id;
-        })
-        var cond = {};
-        cond[idx] = { $set: orders[i] };
-        state = update(state, cond);
-    });
-    return state;
+var STOP_LOSS = 0.005;
+var RATIO = 0.05;
+
+function getVolumn(balance) {
+    return (balance * RATIO) / (STOP_LOSS * 100000);
 }
 
 function Action() {
@@ -76,6 +92,34 @@ function Action() {
                 success: function(res) {
                     dispatch({ type: "FETCH_ORDER_SUCC", orders: res });
                 }
+            });
+        }
+    }
+    this.buyOrder = function() {
+        return function(dispatch, getState) {
+            var id = getState().account.current.id;
+            if (!id) return;
+            var wnd = getState().data.window;
+            var bar = getState().data.displayBars[0];
+            if (order.stopLoss && order.stopLoss < 0) {
+                order.stopLoss += bar.close;
+            }
+            var volumn = getVolumn(getState().account.current.balance);
+            var stopLoss = bar.close - STOP_LOSS;
+            var order = {
+                type: "BUY",
+                volumn: 0.2,
+                price: bar.close,
+                stopLoss: stopLoss,
+                openPrice: bar.close,
+                createTime: bar.datetime,
+                openTime: bar.datetime,
+                status: "OPEN"
+            };
+            order = new Order(order);
+            var json = JSON.stringify(order);
+            $.post("/account/" + id + "/order", json, function(res) {
+                dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
             });
         }
     }
@@ -114,11 +158,12 @@ function Action() {
             order.closeTime = state.data.displayBars[0].datetime;
             order.closePrice = price || state.data.displayBars[0].close;
             order.status = "CLOSE";
+            order.profit = order.getProfit();
             var json = JSON.stringify(order);
             // $.post("/order/" + id, json, function(res) {});
             $.ajax({
                 url: "/account/0/order/" + id,
-                method: "PUT",
+                type: "PUT",
                 data: json,
                 success: function(res) {
                     dispatch({ type: "CLOSE_ORDER_SUCC", order: new Order(res) });
@@ -130,7 +175,7 @@ function Action() {
         return function(dispatch, getState) {
             $.ajax({
                 url: "/account/0/order/" + id,
-                method: "DELETE",
+                type: "DELETE",
                 success: function() {
                     dispatch({ type: "DELETE_ORDER_SUCC", id: id })
                 }
@@ -146,6 +191,7 @@ function Action() {
                 o.status = "CLOSE";
                 o.closePrice = o.stopLoss;
                 o.closeTime = bar.datetime;
+                o.profit = o.getProfit();
                 return o;
             })
             if (!closeOrders.length) {
@@ -157,20 +203,12 @@ function Action() {
             var json = JSON.stringify(closeOrders);
             $.ajax({
                 url: "/account/0/order/",
-                method: "PUT",
+                type: "PUT",
                 data: json,
                 success: function(res) {
-                    dispatch({ type: "CLOSE_ORDER_SUCC", order: new Order(res) });
+                    dispatch({ type: "CLOSE_ORDERS_SUCC", orders: res.map(o => new Order(o)) });
                 }
             });
-            // $.post("/order/" + ids, json, function(res) {
-            //     dispatch({
-            //         type: "CLOSE_ORDER_SUCC",
-            //         order: res.map(function(o) {
-            //             return new Order(o);
-            //         })
-            //     });
-            // });
         }
     }
 }

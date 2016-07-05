@@ -19,8 +19,8 @@ function OrderTableClass() {
     this.renderOperate = function(id) {
         return jade(`
             td(key="op")
-                a(href="#" onClick={this.onCloseClick.bind(null, id)}) 平仓
-                a(href="#" onClick={this.onDeleteClick.bind(null, id)}) 删除
+                a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, id)}) 平仓
+                a(href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, id)}) 删除
             `)
     }
     this.renderDate = function(o) {
@@ -31,7 +31,7 @@ function OrderTableClass() {
         }
     }
     this.render = function() {
-        var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "createTime", "openTime", "closeTime", "operate"];
+        var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "profit", "createTime", "openTime", "closeTime", "operate"];
         var that = this;
         return jade(`
             table(className="table table-bordered")

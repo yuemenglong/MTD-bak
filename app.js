@@ -54,6 +54,7 @@ app.delete("/account/:id", trans);
 
 app.post("/account/:id/order", trans);
 app.put("/account/:id/order/:orderId", trans);
+app.put("/account/:id/order", trans);
 app.delete("/account/:id/order/:orderId", trans);
 
 app.listen(80, function(err) {
