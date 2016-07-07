@@ -6,5 +6,6 @@ var combineReducers = Redux.combineReducers;
 var data = require("./data");
 var orders = require("./orders");
 var account = require("./account");
+var mouse = require("./mouse");
 
-module.exports = combineReducers({ data, orders, account });
+module.exports = combineReducers({ data, orders, account, mouse });

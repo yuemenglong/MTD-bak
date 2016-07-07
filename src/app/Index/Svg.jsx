@@ -8,6 +8,7 @@ var connect = ReactRedux.connect;
 var Provider = ReactRedux.Provider;
 
 var Svg = require("../../component/Svg");
+var mouseAction = require("./reducer/mouse").action;
 
 // input:
 // bars[{open,high,low,close,x1,y1,x2,y2,ma30}] 
@@ -19,12 +20,14 @@ function mapStateToProps(state) {
     var displayBars = state.data.displayBars;
     var wnd = state.data.window;
     var orders = state.orders;
+    var mouse = state.mouse;
     var style = { width: wnd.width, height: wnd.height, backgroundColor: "#888" };
     var props = { style: style, rects: [], lines: [], paths: [], texts: [] };
 
     addGrid(props);
     addBars(displayBars, wnd, props);
     addOrders(orders, displayBars, wnd, props);
+    addMouse(mouse, props);
     return props;
 }
 
@@ -91,6 +94,14 @@ function addGrid(props) {
     for (var i = 0; i < props.style.width; i += GRID) {
         props.lines.push({ x1: i, y1: 0, x2: i, y2: props.style.height, style: style });
     }
+}
+
+function addMouse(mouse, props) {
+    var width = props.style.width;
+    var height = props.style.height;
+    var style = { stroke: "#FFF", strokeWidth: 1 };
+    props.lines.push({ key: "MOUSE_Y", x1: 0, y1: mouse.y, x2: width, y2: mouse.y, style: style });
+    props.lines.push({ key: "MOUSE_X", x1: mouse.x, y1: 0, x2: mouse.x, y2: height, style: style });
 }
 
 function getX(wnd, x) {
@@ -161,12 +172,10 @@ function getBarByTime(bars, datetime, from, to) {
 
 function SvgClass() {
     this.onMouseMove = function(e) {
-        var pos = $(this.getDOMNode()).offset()
-        var rel = {
-            x: e.pageX - pos.left,
-            y: e.pageY - pos.top
-        }
-        console.log(rel);
+        var pos = $(ReactDOM.findDOMNode(this)).offset()
+        var x = e.pageX - pos.left;
+        var y = e.pageY - pos.top;
+        this.props.dispatch(mouseAction.mouseMove(x, y));
     }
     this.render = function() {
         return jade("Svg({...this.props} onMouseMove={this.onMouseMove})");
