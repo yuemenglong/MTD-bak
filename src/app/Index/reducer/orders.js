@@ -1,5 +1,9 @@
 var _ = require("lodash");
 var update = require('react-addons-update');
+var context = require("../context");
+
+var STOP_LOSS = 0.005;
+var RATIO = 0.05;
 
 function Order(order) {
     _.merge(this, order)
@@ -71,13 +75,6 @@ function between(n, a, b) {
     return Math.min(a, b) <= n && n <= Math.max(a, b);
 }
 
-var STOP_LOSS = 0.005;
-var RATIO = 0.05;
-
-function getVolumn(balance) {
-    return (balance * RATIO) / (STOP_LOSS * 100000);
-}
-
 function Action() {
     this.fetchOrders = function() {
         return function(dispatch, getState) {
@@ -99,22 +96,21 @@ function Action() {
         return function(dispatch, getState) {
             var id = getState().account.current.id;
             if (!id) return;
+            var ctx = context(getState());
             var wnd = getState().data.window;
             var bar = getState().data.displayBars[0];
-            if (order.stopLoss && order.stopLoss < 0) {
-                order.stopLoss += bar.close;
-            }
-            var volumn = getVolumn(getState().account.current.balance);
-            var stopLoss = bar.close - STOP_LOSS;
+
+            var price = ctx.getMousePrice();
+            var volumn = ctx.getVolumn();
+            var stopLoss = price - ctx.getStopLoss();
+            var createTime = ctx.getBar().datetime;
             var order = {
-                type: "BUY",
-                volumn: 0.2,
-                price: bar.close,
+                type: "BUYLIMIT",
+                volumn: volumn,
+                price: price,
                 stopLoss: stopLoss,
-                openPrice: bar.close,
-                createTime: bar.datetime,
-                openTime: bar.datetime,
-                status: "OPEN"
+                createTime: createTime,
+                status: "CREATE"
             };
             order = new Order(order);
             var json = JSON.stringify(order);
@@ -123,32 +119,6 @@ function Action() {
             });
         }
     }
-    this.sendOrder = function(order) {
-        //{type, volumn}
-        return function(dispatch, getState) {
-            var id = getState().account.current.id;
-            if (!id) return;
-            var wnd = getState().data.window;
-            if (order.type === "BUY" || order.type === "SELL") {
-                var bar = getState().data.displayBars[0];
-                if (order.stopLoss && order.stopLoss < 0) {
-                    order.stopLoss += bar.close;
-                }
-                _.merge(order, {
-                    price: bar.close,
-                    openPrice: bar.close,
-                    createTime: bar.datetime,
-                    openTime: bar.datetime,
-                    status: "OPEN"
-                });
-            }
-            order = new Order(order);
-            var json = JSON.stringify(order);
-            $.post("/account/" + id + "/order", json, function(res) {
-                dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
-            });
-        }
-    };
     this.closeOrder = function(id, price) {
         return function(dispatch, getState) {
             var state = getState();
@@ -193,7 +163,7 @@ function Action() {
                 o.closeTime = bar.datetime;
                 o.profit = o.getProfit();
                 return o;
-            })
+            });
             if (!closeOrders.length) {
                 return;
             }

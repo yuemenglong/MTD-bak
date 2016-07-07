@@ -23,12 +23,7 @@ function WindowClass() {
             } else if (e.keyCode === 37) {
                 dispatch({ type: "MOVE_PREV" });
             } else if (e.keyCode === 66) {
-                var order = {
-                    type: "BUY",
-                    volumn: 0.2,
-                    stopLoss: -0.01,
-                };
-                dispatch(ordersAction.sendOrder(order));
+                dispatch(ordersAction.buyOrder());
             }
         })
         $(document).ready(function() {
