@@ -44,7 +44,7 @@ function reducer(state, action) {
         case "CLOSE_ORDER_SUCC":
             state.current = action.order.account;
             return state;
-        case "CLOSE_ORDERS_SUCC":
+        case "UPDATE_ORDERS_SUCC":
             state.current = action.orders[0].account;
             return state;
         default:

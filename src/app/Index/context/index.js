@@ -3,6 +3,10 @@ var _ = require("lodash");
 var STOP_LOSS = 0.005;
 var RATIO = 0.05;
 
+function between(n, a, b) {
+    return Math.min(a, b) <= n && n <= Math.max(a, b);
+}
+
 function Context(state) {
     this.getMousePrice = function() {
         var wnd = state.data.window;
@@ -24,6 +28,22 @@ function Context(state) {
     this.getBar = function(n) {
         n = n || 0;
         return state.data.displayBars[n];
+    }
+    this.getOpenOrders = function() {
+        var bar = this.getBar();
+        var orders = state.orders;
+        var openOrders = orders.filter(function(order) {
+            return order.status == "CREATE" && between(order.price, bar.high, bar.low);
+        })
+        return openOrders;
+    }
+    this.getCloseOrders = function() {
+        var bar = this.getBar();
+        var orders = state.orders;
+        var closeOrders = orders.filter(function(o) {
+            return o.status == "OPEN" && between(o.stopLoss, bar.high, bar.low);
+        })
+        return closeOrders;
     }
 }
 

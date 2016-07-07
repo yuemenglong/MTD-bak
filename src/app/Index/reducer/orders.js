@@ -20,9 +20,9 @@ Order.prototype.toJSON = function() {
 
 Order.prototype.getProfit = function() {
     var profit = 0;
-    if (this.type === "BUY") {
+    if (_.startsWith(this.type, "BUY")) {
         profit = (this.closePrice - this.openPrice) * this.volumn * 100000;
-    } else if (this.type === "SELL") {
+    } else if (_.startsWith(this.type, "SELL")) {
         profit = (this.openPrice - this.closePrice) * this.volumn * 100000;
     }
     profit = _.round(profit, 2);
@@ -50,7 +50,7 @@ function reducer(state, action) {
                 return o;
             })
             return state;
-        case "CLOSE_ORDERS_SUCC":
+        case "UPDATE_ORDERS_SUCC":
             var ordersMap = _.fromPairs(action.orders.map(function(o) {
                 return [o.id, o];
             }));
@@ -154,29 +154,39 @@ function Action() {
     }
     this.checkOrders = function(bar) {
         return function(dispatch, getState) {
-            var orders = getState().orders;
-            var closeOrders = orders.filter(function(o) {
-                return o.status === "OPEN" && between(o.stopLoss, bar.high, bar.low);
-            }).map(function(o) {
+            var ctx = context(getState());
+            var closeOrders = ctx.getCloseOrders();
+            closeOrders = closeOrders.map(function(o) {
                 o.status = "CLOSE";
                 o.closePrice = o.stopLoss;
-                o.closeTime = bar.datetime;
+                o.closeTime = ctx.getBar().datetime;
                 o.profit = o.getProfit();
                 return o;
-            });
-            if (!closeOrders.length) {
+            })
+            var openOrders = ctx.getOpenOrders();
+            openOrders = openOrders.map(function(o) {
+                o.status = "OPEN";
+                o.openPrice = o.price;
+                o.openTime = ctx.getBar().datetime;
+                return o;
+            })
+            var updateOrders = [].concat(openOrders).concat(closeOrders);
+            // var orders = getState().orders;
+            // var closeOrders = orders.filter(function(o) {
+            //     return o.status === "OPEN" && between(o.stopLoss, bar.high, bar.low);
+            // }).map(function(o) {
+
+            // });
+            if (!updateOrders.length) {
                 return;
             }
-            var ids = closeOrders.map(function(o) {
-                return o.id;
-            }).join(",");
-            var json = JSON.stringify(closeOrders);
+            var json = JSON.stringify(updateOrders);
             $.ajax({
                 url: "/account/0/order/",
                 type: "PUT",
                 data: json,
                 success: function(res) {
-                    dispatch({ type: "CLOSE_ORDERS_SUCC", orders: res.map(o => new Order(o)) });
+                    dispatch({ type: "UPDATE_ORDERS_SUCC", orders: res.map(o => new Order(o)) });
                 }
             });
         }

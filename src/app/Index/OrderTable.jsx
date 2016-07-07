@@ -31,7 +31,9 @@ function OrderTableClass() {
         }
     }
     this.render = function() {
-        var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "profit", "createTime", "openTime", "closeTime", "operate"];
+        var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "profit",
+            "createTime", "openPrice", "openTime", "closePrice", "closeTime", "operate"
+        ];
         var that = this;
         return jade(`
             table(className="table table-bordered")
