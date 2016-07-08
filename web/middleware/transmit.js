@@ -27,9 +27,9 @@ function transmit(host, port) {
                 var info = util.format("[%s] [%d] %s%s", req.method.toUpperCase(), backendRes.statusCode, req.originalUrl, body);
                 if (backendRes.statusCode !== 200) {
                     logger.error(info);
-                } else {
-                    logger.info("[%s] [%d] %s%s", req.method.toUpperCase(), backendRes.statusCode, req.originalUrl, body)
+                    return res.status(500).end(JSON.stringify({ name: "BACKEND_ERROR", message: backendRes.statusCode }));
                 }
+                logger.info("[%s] [%d] %s%s", req.method.toUpperCase(), backendRes.statusCode, req.originalUrl, body)
                 if (req.xhr) {
                     res.writeHead(backendRes.statusCode, backendRes.headers);
                     return res.end(ret);
@@ -58,7 +58,10 @@ function transmit(host, port) {
     var _put = [];
     var _delete = [];
 
-    var methodMap = {}
+    var _exclude = [];
+    var excludeRegex = null;
+
+    var methodMap = {};
 
     function mergeRegex(arr) {
         if (!arr.length) {
@@ -70,15 +73,17 @@ function transmit(host, port) {
     }
 
     function normalizeUrl(url) {
-        return url.replace("/", "\\/").replace(/:[^/]*/g, "[^/]*");
+        var ret = "^" + url.replace(/\*/g, ".*").replace(/:[^/]*/g, "[^/]*") + "$";
+        return ret;
     }
 
     function ret(req, res, next) {
         var method = req.method;
-        if (!methodMap[method]) {
+        debugger;
+        if (excludeRegex && excludeRegex.test(req.path)) {
             return next();
         }
-        if (!methodMap[method].test(req.path)) {
+        if (!methodMap[method] || !methodMap[method].test(req.path)) {
             return next();
         }
         return handler(req, res);
@@ -102,6 +107,11 @@ function transmit(host, port) {
         url = normalizeUrl(url);
         _delete.push(url);
         methodMap.DELETE = mergeRegex(_delete);
+    }
+    ret.exclude = function(url) {
+        url = normalizeUrl(url);
+        _exclude.push(url);
+        excludeRegex = mergeRegex(_exclude);
     }
     return ret;
 }

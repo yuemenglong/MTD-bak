@@ -17,13 +17,15 @@ function WindowClass() {
         var dispatch = this.props.dispatch;
         $.ajaxSetup({ contentType: "application/json; charset=utf-8" });
         $(document).keydown(function(e) {
-            // console.log(e.keyCode);
+            console.log(e.keyCode);
             if (e.keyCode === 39) {
                 dispatch(dataAction.moveNext());
             } else if (e.keyCode === 37) {
                 dispatch({ type: "MOVE_PREV" });
             } else if (e.keyCode === 66) {
                 dispatch(ordersAction.buyOrder());
+            } else if (e.keyCode == 83) {
+                dispatch(ordersAction.sellOrder());
             }
         })
         $(document).ready(function() {

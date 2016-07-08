@@ -119,6 +119,33 @@ function Action() {
             });
         }
     }
+    this.sellOrder = function() {
+        return function(dispatch, getState) {
+            var id = getState().account.current.id;
+            if (!id) return;
+            var ctx = context(getState());
+            var wnd = getState().data.window;
+            var bar = getState().data.displayBars[0];
+
+            var price = ctx.getMousePrice();
+            var volumn = ctx.getVolumn();
+            var stopLoss = price + ctx.getStopLoss();
+            var createTime = ctx.getBar().datetime;
+            var order = {
+                type: "SELLLIMIT",
+                volumn: volumn,
+                price: price,
+                stopLoss: stopLoss,
+                createTime: createTime,
+                status: "CREATE"
+            };
+            order = new Order(order);
+            var json = JSON.stringify(order);
+            $.post("/account/" + id + "/order", json, function(res) {
+                dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
+            });
+        }
+    }
     this.closeOrder = function(id, price) {
         return function(dispatch, getState) {
             var state = getState();
