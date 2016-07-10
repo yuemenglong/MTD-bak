@@ -6,6 +6,30 @@ var connect = ReactRedux.connect;
 
 var ordersAction = require("./reducer/orders").action;
 
+function renderOrderTable(orders) {
+    var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "profit",
+        "createTime", "openPrice", "openTime", "closePrice", "closeTime", "operate"
+    ];
+    var that = this;
+    return jade(`
+            table(className="table table-bordered")
+                thead
+                    tr #{}
+                tbody #{}`,
+        function() {
+            return _.map(header, o => jade("th(key={o}) {o}"));
+        },
+        function() {
+            return _.map(orders, function(order) {
+                return jade("tr(key={order.id}) #{}", function() {
+                    return _.map(header.slice(0, -1), o => jade("td(key={o}) {that.renderDate(order[o])}"))
+                        .concat([that.renderOperate(order)]);
+                });
+            })
+        }
+    );
+}
+
 // orders[] 
 function OrderTableClass() {
     this.onCloseClick = function(id) {
@@ -16,12 +40,20 @@ function OrderTableClass() {
         this.props.dispatch(ordersAction.deleteOrder(id));
         return false;
     }
-    this.renderOperate = function(id) {
+    this.renderOrderTable = renderOrderTable;
+    this.renderOperate = function(order) {
         return jade(`
             td(key="op")
-                a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, id)}) 平仓
-                a(href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, id)}) 删除
-            `)
+                #{}
+                a(href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
+            `,
+            function() {
+                if (order.status != "CLOSE") {
+                    return jade('a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓');
+                }
+                return;
+            }.bind(this)
+        )
     }
     this.renderDate = function(o) {
         if (_.isDate(o)) {
@@ -47,7 +79,7 @@ function OrderTableClass() {
                 return _.map(that.props.orders, function(order) {
                     return jade("tr(key={order.id}) #{}", function() {
                         return _.map(header.slice(0, -1), o => jade("td(key={o}) {that.renderDate(order[o])}"))
-                            .concat([that.renderOperate(order.id)]);
+                            .concat([that.renderOperate(order)]);
                     });
                 })
             }
