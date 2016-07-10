@@ -30,8 +30,39 @@ function renderOrderTable(orders) {
     );
 }
 
+function renderOperate(order) {
+    return jade(`
+            td(key="op")
+                #{}
+                br
+                a(href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
+            `,
+        function() {
+            if (order.status != "CLOSE") {
+                return jade('a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓');
+            }
+            return;
+        }.bind(this)
+    )
+}
+
+function renderNav() {
+    var activeIndex = this.state.activeIndex || 0;
+    return jade("ul(className='nav nav-tabs')", function() {
+        return ["当前", "历史"].map(function(o, i) {
+            var className = activeIndex == i ? "active" : "";
+            return jade(`
+                li(className={className} key={o})
+                    a(href="javascript:void(0);" onClick={this.onClickNav.bind(null, i)}) {o}`);
+        }.bind(this))
+    }.bind(this));
+}
+
 // orders[] 
 function OrderTableClass() {
+    this.getInitialState = function() {
+        return { activeIndex: 0 };
+    }
     this.onCloseClick = function(id) {
         this.props.dispatch(ordersAction.closeOrder(id));
         return false;
@@ -40,21 +71,12 @@ function OrderTableClass() {
         this.props.dispatch(ordersAction.deleteOrder(id));
         return false;
     }
-    this.renderOrderTable = renderOrderTable;
-    this.renderOperate = function(order) {
-        return jade(`
-            td(key="op")
-                #{}
-                a(href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
-            `,
-            function() {
-                if (order.status != "CLOSE") {
-                    return jade('a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓');
-                }
-                return;
-            }.bind(this)
-        )
+    this.onClickNav = function(idx) {
+        this.setState({ activeIndex: idx });
     }
+    this.renderOrderTable = renderOrderTable;
+    this.renderOperate = renderOperate;
+    this.renderNav = renderNav;
     this.renderDate = function(o) {
         if (_.isDate(o)) {
             return o.toLocaleString();
@@ -63,27 +85,14 @@ function OrderTableClass() {
         }
     }
     this.render = function() {
-        var header = ["type", "price", "volumn", "stopLoss", "stopWin", "status", "profit",
-            "createTime", "openPrice", "openTime", "closePrice", "closeTime", "operate"
-        ];
-        var that = this;
-        return jade(`
-            table(className="table table-bordered")
-                thead
-                    tr #{}
-                tbody #{}`,
-            function() {
-                return _.map(header, o => jade("th(key={o}) {o}"));
-            },
-            function() {
-                return _.map(that.props.orders, function(order) {
-                    return jade("tr(key={order.id}) #{}", function() {
-                        return _.map(header.slice(0, -1), o => jade("td(key={o}) {that.renderDate(order[o])}"))
-                            .concat([that.renderOperate(order)]);
-                    });
-                })
+        var orders = this.props.orders.filter(function(order) {
+            if (this.state.activeIndex == 0) {
+                return order.status != "CLOSE";
+            } else {
+                return order.status == "CLOSE";
             }
-        );
+        }.bind(this));
+        return jade(`div #{}#{}`, this.renderNav(), this.renderOrderTable(orders));
     }
 }
 
