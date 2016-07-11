@@ -21,6 +21,7 @@ function mapStateToProps(state) {
     var wnd = state.data.window;
     var orders = state.orders;
     var mouse = state.mouse;
+    var datetime = _.get(state, "data.displayBars[0].datetime");
     var style = { width: wnd.width, height: wnd.height, backgroundColor: "#888" };
     var props = { style: style, rects: [], lines: [], paths: [], texts: [] };
 
@@ -28,6 +29,7 @@ function mapStateToProps(state) {
     addBars(displayBars, wnd, props);
     addOrders(orders, displayBars, wnd, props);
     addMouse(mouse, props);
+    addDatetime(datetime, props);
     return props;
 }
 
@@ -36,6 +38,18 @@ var GRID = 32;
 
 function between(n, a, b) {
     return Math.min(a, b) <= n && n <= Math.max(a, b);
+}
+
+function addDatetime(datetime, props) {
+    if (!datetime) {
+        return;
+    }
+    //{x,y,style,text}
+    var style = { fill: "#00ff33", fontSize: "30" };
+    var x = 30;
+    var y = props.style.height - 30;
+    var text = moment(datetime).format("YYYY-MM-DD HH:mm:ss");
+    props.texts.push({ x: x, y: y, text: text, style: style });
 }
 
 function addOrders(orders, displayBars, wnd, props) {

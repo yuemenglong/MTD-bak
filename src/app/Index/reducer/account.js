@@ -2,19 +2,6 @@ var _ = require("lodash");
 var update = require('react-addons-update');
 var ordersAction = require("./orders").action;
 
-function Order(order) {
-    _.merge(this, order)
-    var times = ["createTime", "openTime", "closeTime"];
-    _.forEach(times, function(field) {
-        this[field] = this[field] && new Date(this[field]);
-    }.bind(this))
-}
-
-Order.prototype.toJSON = function() {
-    var order = _.mapValues(this, o => _.isDate(o) ? moment(o).format("YYYY-MM-DD HH:mm:ss") : o);
-    return order;
-}
-
 function reducer(state, action) {
     state = state || { accounts: [], current: {} };
     state = _.cloneDeep(state);
@@ -43,6 +30,9 @@ function reducer(state, action) {
             return state;
         case "CLOSE_ORDER_SUCC":
             state.current = action.order.account;
+            return state;
+        case "DELETE_ORDER_SUCC":
+            state.current = action.account;
             return state;
         case "UPDATE_ORDERS_SUCC":
             state.current = action.orders[0].account;

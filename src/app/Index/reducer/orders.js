@@ -173,8 +173,8 @@ function Action() {
             $.ajax({
                 url: "/account/0/order/" + id,
                 type: "DELETE",
-                success: function() {
-                    dispatch({ type: "DELETE_ORDER_SUCC", id: id })
+                success: function(account) {
+                    dispatch({ type: "DELETE_ORDER_SUCC", id: id, account: account })
                 }
             });
         }

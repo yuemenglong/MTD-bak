@@ -33,15 +33,19 @@ function Context(state) {
         var bar = this.getBar();
         var orders = state.orders;
         var openOrders = orders.filter(function(order) {
-            return order.status == "CREATE" && between(order.price, bar.high, bar.low);
+            return order.status == "CREATE" &&
+                order.createTime < bar.datetime &&
+                between(order.price, bar.high, bar.low);
         })
         return openOrders;
     }
     this.getCloseOrders = function() {
         var bar = this.getBar();
         var orders = state.orders;
-        var closeOrders = orders.filter(function(o) {
-            return o.status == "OPEN" && between(o.stopLoss, bar.high, bar.low);
+        var closeOrders = orders.filter(function(order) {
+            return order.status == "OPEN" &&
+                order.openTime < bar.datetime &&
+                between(order.stopLoss, bar.high, bar.low);
         })
         return closeOrders;
     }

@@ -40,7 +40,7 @@ function AccountOperateClass() {
         return jade(`
             div
                 input(type="text" name="name" placeholder="账户名称" value={this.props.current.name} onChange={this.onUpdateAccount})
-                input(type="text" name="balance" placeholder="账户资金" value={this.props.current.balance} onChange={this.onUpdateAccount})
+                input(type="text" name="balance" placeholder="账户资金" value={_.round(this.props.current.balance,2)} onChange={this.onUpdateAccount})
                 a(href="javascript:void(0)" onClick={this.onAddAccount}) 添加
                 |{this.renderSelectAccount()}
                 a(href="javascript:void(0)" onClick={this.onDeleteAccount}) 删除
