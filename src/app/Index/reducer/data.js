@@ -96,7 +96,7 @@ function Action() {
     this.moveNext = function() {
         return function(dispatch, getState) {
             dispatch({ type: "MOVE_NEXT" });
-            dispatch(ordersAction.checkOrders(getState().data.displayBars[0]));
+            dispatch(ordersAction.checkOrders());
         }
     }
 }

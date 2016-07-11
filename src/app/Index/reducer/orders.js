@@ -179,7 +179,7 @@ function Action() {
             });
         }
     }
-    this.checkOrders = function(bar) {
+    this.checkOrders = function() {
         return function(dispatch, getState) {
             var ctx = context(getState());
             var closeOrders = ctx.getCloseOrders();
