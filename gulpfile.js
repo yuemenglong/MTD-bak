@@ -91,16 +91,16 @@ function pack() {
         pre.plugin(jp);
         // pre.plugin(ep);
         pre.plugin(lp);
-        // var lessTask = lp.pipe(gulp.dest(`bundle/${name}`));
         var jadeTask = jp.pipe(gulp.dest("web/jade"));
         jadeTasks.push(jadeTask);
-        // lessTasks.push(lessTask);
+        var lessTask = lp.pipe(gulp.dest(`bundle/${name}`));
+        lessTasks.push(lessTask);
         return b.bundle()
             .pipe(source("bundle.js"))
             .pipe(buffer())
             .pipe(gulp.dest(`bundle/${name}`))
     })
-    return merge(packTasks.concat(jadeTasks));
+    return merge(packTasks.concat(jadeTasks).concat(lessTasks));
 }
 
 function clean() {

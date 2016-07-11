@@ -35,7 +35,7 @@ function renderOperate(order) {
             td(key="op")
                 #{}
                 br
-                a(href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
+                a(className="order-delete" href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
             `,
         function() {
             if (order.status != "CLOSE") {
