@@ -31,19 +31,28 @@ function renderOrderTable(orders) {
 }
 
 function renderOperate(order) {
-    return jade(`
+    if (order.status == "CLOSE") {
+        return jade(`
             td(key="op")
-                #{}
+                a(className="order-delete" href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
+            `);
+    } else if (order.status == "CREATE") {
+        return jade(`
+            td(key="op")
+                a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓
                 br
                 a(className="order-delete" href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
-            `,
-        function() {
-            if (order.status != "CLOSE") {
-                return jade('a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓');
-            }
-            return;
-        }.bind(this)
-    )
+            `);
+    } else if (order.status == "OPEN") {
+        return jade(`
+            td(key="op")
+                a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓
+                br
+                a(href="javascript:void(0);" onClick={this.onResendClick.bind(null, order.id)}) 重挂
+                br
+                a(className="order-delete" href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
+            `);
+    }
 }
 
 function renderNav() {
@@ -65,11 +74,12 @@ function OrderTableClass() {
     }
     this.onCloseClick = function(id) {
         this.props.dispatch(ordersAction.closeOrder(id));
-        return false;
+    }
+    this.onResendClick = function(id) {
+        this.props.dispatch(ordersAction.resendOrder(id));
     }
     this.onDeleteClick = function(id) {
         this.props.dispatch(ordersAction.deleteOrder(id));
-        return false;
     }
     this.onClickNav = function(idx) {
         this.setState({ activeIndex: idx });

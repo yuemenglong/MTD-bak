@@ -157,7 +157,6 @@ function Action() {
             order.status = "CLOSE";
             order.profit = order.getProfit();
             var json = JSON.stringify(order);
-            // $.post("/order/" + id, json, function(res) {});
             $.ajax({
                 url: "/account/0/order/" + id,
                 type: "PUT",
@@ -167,6 +166,30 @@ function Action() {
                 }
             })
         }
+    }
+    this.resendOrder = function(id) {
+        return function(dispatch, getState) {
+            var ctx = context(getState());
+            var state = getState();
+            var order = state.orders.filter(function(o) {
+                return o.id === id;
+            })[0];
+            dispatch(this.closeOrder(id));
+            var aid = getState().account.current.id;
+            var resend = {
+                type: order.type,
+                volumn: order.volumn,
+                price: order.price,
+                stopLoss: order.stopLoss,
+                createTime: ctx.getBar().datetime,
+                status: "CREATE"
+            };
+            resend = new Order(resend);
+            var json = JSON.stringify(resend);
+            $.post("/account/" + aid + "/order", json, function(res) {
+                dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
+            });
+        }.bind(this);
     }
     this.deleteOrder = function(id) {
         return function(dispatch, getState) {
