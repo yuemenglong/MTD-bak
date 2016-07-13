@@ -31,16 +31,9 @@ function renderOrderTable(orders) {
 }
 
 function renderOperate(order) {
-    if (order.status == "CLOSE") {
+    if (order.status == "CLOSE" || order.status == "CREATE") {
         return jade(`
             td(key="op")
-                a(className="order-delete" href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
-            `);
-    } else if (order.status == "CREATE") {
-        return jade(`
-            td(key="op")
-                a(href="javascript:void(0);" onClick={this.onCloseClick.bind(null, order.id)}) 平仓
-                br
                 a(className="order-delete" href="javascript:void(0);" onClick={this.onDeleteClick.bind(null, order.id)}) 删除
             `);
     } else if (order.status == "OPEN") {

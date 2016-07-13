@@ -66,6 +66,8 @@ function reducer(state, action) {
                 return o.id != action.id;
             })
             return state;
+        case "DELETE_ACCOUNT_SUCC":
+            return [];
         default:
             return state;
     }
