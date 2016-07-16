@@ -1,0 +1,29 @@
+.table {
+    &>thead>tr>th {
+        text-align: center;
+        vertical-align: middle;
+    }
+    &>tbody>tr>td {
+        text-align: center;
+        vertical-align: middle;
+    }
+}
+
+.panel {
+    margin-bottom: 0px;
+    .panel-body {
+        .table {
+            margin-bottom: 0px;
+            tr th {
+                border-bottom: 0px;
+            }
+            tr td {
+                border-top: 0px;
+            }
+        }
+    }
+}
+
+.panel-popup {
+    border-bottom-right-radius: 0px;
+}
