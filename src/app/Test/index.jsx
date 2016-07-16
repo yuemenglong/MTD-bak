@@ -5,28 +5,83 @@ var EventEmitter = require("events").EventEmitter;
 var Redux = require("redux");
 var ReactRedux = require("react-redux");
 var connect = ReactRedux.connect;
+var moment = require("moment");
 
 var reducer = require("./reducer");
 var todoAction = require("./reducer/todo").action;
 
 require("./style.less");
 
-function AppClass() {
-    this.getInitialState = function() {
-        var event = new EventEmitter();
-        event.on("insert", function(text) {
-            this.props.dispatch(todoAction.addItem(text));
-        }.bind(this))
-        return { event: event };
+var headers = ["company", "lineNo", "from", "to", "startTime", "endTime"];
+
+function renderLegHeader() {
+    return jade("tr", function() {
+        return headers.map(function(item) {
+            return jade("td {item}");
+        })
+    })
+}
+
+function renderLeg(leg) {
+    return jade("tr", function() {
+        return headers.map(function(item) {
+            return jade("td {leg[item]}");
+        })
+    })
+}
+
+function renderLegs(legs) {
+    return legs.map(renderLeg);
+}
+
+function renderLegTable(legs) {
+    return jade(`
+        table(className="table ticket")
+            thead #{}
+            tbody #{}
+        `,
+        renderLegHeader(),
+        renderLegs(legs)
+    );
+}
+
+function renderPnr(pnr){
+    return jade(`
+        div
+            span 定位编码
+            br
+            span pnr
+        `);
+}
+
+function TestClass() {
+    this.getDefaultProps = function() {
+        return {
+            pnr: "12345",
+            legs: [{
+                lineNo: 981,
+                company: "CA",
+                from: "PEK",
+                to: "JFK",
+                startTime: moment().format("YYYY-MM-DD"),
+                endTime: moment().format("YYYY-MM-DD"),
+            }, {
+                lineNo: 982,
+                company: "UA",
+                from: "JFK",
+                to: "SFO",
+                startTime: moment().format("YYYY-MM-DD"),
+                endTime: moment().format("YYYY-MM-DD"),
+            }]
+        }
     }
     this.render = function() {
-        return jade("Todo({...this.props} event={this.state.event})");
+        return jade(`
+            div(className="book-result")
+            `,
+            renderLegTable(this.props.legs));
     }
 }
 
-function mapStateToProps(state) {
-    return { list: state.todo };
-}
-
-module.exports = connect(mapStateToProps)(React.createClass(new AppClass()));
+module.exports = connect()(React.createClass(new TestClass()));
 module.exports.reducer = reducer;
