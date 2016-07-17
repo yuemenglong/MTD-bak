@@ -9,6 +9,8 @@ var moment = require("moment");
 
 var reducer = require("./reducer");
 var todoAction = require("./reducer/todo").action;
+var Table = require("../../component/Table");
+var Modal = require("../../component/Modal");
 
 require("./style.less");
 
@@ -45,7 +47,7 @@ function renderLegTable(legs) {
     );
 }
 
-function renderPnr(pnr){
+function renderPnr(pnr) {
     return jade(`
         div
             span 定位编码
@@ -75,11 +77,74 @@ function TestClass() {
             }]
         }
     }
+    this.renderPnr = function(pnr) {
+        return jade(`
+            span
+                input(type="checkbox")
+                |{pnr}
+            `);
+    }
+    this.renderPrice = function(current, total) {
+        return jade(`
+            span
+                input(type="text" value={current})
+                |/{total}
+            `);
+    }
+    this.renderTable = function() {
+        var objectHeader = ["lineNo", "company", "from", "to", "startTime", "endTime"]
+        var header = _.flatten(["定位编码", objectHeader, "支付价格"]);
+        var pnr = this.renderPnr(this.props.pnr);
+        var price = this.renderPrice(50, 100);
+        var body = this.props.legs.map(function(leg) {
+            var objectField = _.values(leg);
+            var ret = [pnr, objectField, price];
+            return _.flatten(ret);
+        }.bind(this));
+        return jade(`
+            Table(className="table cch-table cch-book" body={body} rowspan={[0, 7]})
+            `);
+    }
+    this.renderCustom = function() {
+        return jade("Table(className='table cch-table' header={['Y/X/C', '1203123123']})");
+    }
+    this.renderPanel = function() {
+        return jade(`
+            div(className="panel cch-panel panel-primary")
+                //- div(className="panel-heading") heading 
+                div(className="panel-body") {this.renderCustom()}
+                |{this.renderTable()}
+                //- div(className="panel-body")
+                div(className="panel-heading") heading 
+                |{this.renderTable()}
+            `);
+    }
+    this.renderTableInnerTable = function() {
+        var innerTable = jade(`
+               div
+                    span(className="cch-justify") 1
+                    span(className="cch-justify") 2
+                    span(className="cch-justify") 3
+            `);
+        var body = [
+            [innerTable, 4, 5]
+        ];
+        return jade(`
+            Table(className="table cch-table", body={body})
+            `);
+    }
+    this.renderFilter = function() {
+        var body = [
+            ["firstName", jade("input(type='text')"), "lastName", jade("input(type='text')")],
+        ]
+        return jade("Table(className='table cch-table cch-filter' body={body})");
+    }
     this.render = function() {
         return jade(`
-            div(className="book-result")
-            `,
-            renderLegTable(this.props.legs));
+            Modal 
+                |{this.renderPanel()}
+                |{this.renderFilter()}
+            `)
     }
 }
 

@@ -6,9 +6,6 @@ require("./style.less");
 
 //{header[], body[[],[]], }
 function TableClass() {
-    this.getDefaultProps = function() {
-        return {};
-    }
     this.getColPrev = function(i, j) {
         if (i == 0) return;
         return this.props.body[i - 1][j];
