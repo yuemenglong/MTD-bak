@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var alg = require("./alg");
 
 var STOP_LOSS = 0.005;
 var RATIO = 0.05;
@@ -48,6 +49,53 @@ function Context(state) {
                 between(order.stopLoss, bar.high, bar.low);
         })
         return closeOrders;
+    }
+    this.getSmartOrder = function(n) {
+        n = n || 40;
+        if (state.data.displayBars.length < n) {
+            return;
+        }
+        //1. determine it's up/down
+        var xn = _.range(0, n);
+        var yn = _.reverse(state.data.displayBars.slice(0, 40)).map(function(bar) {
+            return bar.close;
+        })
+        var ret = alg.polyfit(xn, yn);
+        var k = ret.k * 10000;
+        console.log(k);
+        //2. get the extreme point
+        var displayBars = state.data.displayBars;
+        for (var i = 0; i < displayBars.length; i++) {
+            if (k < 0) {
+                var va = _.max([displayBars[i + 1].open, displayBars[i + 1].close]);
+                var vb = _.max([displayBars[i].open, displayBars[i].close]);
+                if (va < vb) {
+                    break;
+                }
+            } else if (k > 0) {
+                var va = _.min([displayBars[i + 1].open, displayBars[i + 1].close]);
+                var vb = _.min([displayBars[i].open, displayBars[i].close]);
+                if (va > vb) {
+                    break;
+                }
+            }
+        }
+        var bar = displayBars[i];
+        var type = k > 0 ? "SELLLIMIT" : "BUYLIMIT";
+        var volumn = this.getVolumn();
+        var price = vb;
+        var stopLoss = price + STOP_LOSS * k / Math.abs(k);
+        var createTime = bar.datetime;
+        return {
+            type: type,
+            volumn: volumn,
+            price: price,
+            stopLoss: stopLoss,
+            createTime: createTime,
+            status: "CREATE"
+        }
+        // console.log(k, va, vb);
+        // console.log(bar.datetime);
     }
 }
 

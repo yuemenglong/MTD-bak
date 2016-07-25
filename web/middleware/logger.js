@@ -7,13 +7,13 @@ module.exports = function() {
         req.on("data", function(data) {
             buf.push(data);
         })
-        req.on("end", function() {
+        req.on("error", function(err) {
+            logger.error(err);
+        })
+        res.on("finish", function() {
             var content = Buffer.concat(buf).toString();
             content = content.length ? "\n" + content : "";
             logger.log("[%s] [%d] %s%s", req.method.toUpperCase(), res.statusCode, req.originalUrl, content);
-        })
-        req.on("error", function(err) {
-            logger.error(err);
         })
         next();
     }

@@ -49,6 +49,8 @@ transmit.put("/account/:id/order/:orderId");
 transmit.put("/account/:id/order");
 transmit.delete("/account/:id/order/:orderId");
 
+transmit.get("/bar");
+
 app.listen(80, function(err) {
     if (err) {
         console.log("Start Fail !!!");

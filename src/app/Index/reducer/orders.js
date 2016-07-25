@@ -148,6 +148,26 @@ function Action() {
             });
         }
     }
+    this.smartOrder = function() {
+        return function(dispatch, getState) {
+            var id = getState().account.current.id;
+            if (!id) return;
+            var ctx = context(getState());
+            var order = ctx.getSmartOrder();
+            if (!order) {
+                return;
+            }
+            order = new Order(order);
+            $.ajax({
+                url: "/account/" + id + "/order",
+                type: "POST",
+                data: JSON.stringify(order),
+                success: function(res) {
+                    dispatch({ type: "SEND_ORDER_SUCC", order: new Order(res) });
+                }
+            })
+        }
+    }
     this.closeOrder = function(id, price) {
         return function(dispatch, getState) {
             var state = getState();

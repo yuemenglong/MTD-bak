@@ -26,6 +26,8 @@ function WindowClass() {
                 dispatch(ordersAction.buyOrder());
             } else if (e.keyCode == 83) {
                 dispatch(ordersAction.sellOrder());
+            } else if (e.keyCode == 88) {
+                dispatch(ordersAction.smartOrder());
             }
         })
         $(document).ready(function() {

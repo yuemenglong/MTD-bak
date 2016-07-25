@@ -1,5 +1,7 @@
 var _ = require("lodash");
 var ordersAction = require("./orders").action;
+var moment = require("moment");
+var context = require("../context");
 
 var BAR_WIDTH = 4;
 var BAR_GAP = 4;
@@ -12,7 +14,12 @@ function Bar(bar) {
 function reducer(state, action) {
     state = state || { bars: [], displayBars: [], window: { width: 1280, height: 640, pos: 0 } };
     switch (action.type) {
+        case "FETCH_DATA":
+            state = _.clone(state);
+            state._fetch = true;
+            return state;
         case "FETCH_DATA_SUCC":
+            delete state._fetch;
             var wnd = _.clone(state.window);
             var bars = action.data.reduce(function(acc, item) {
                 acc.unshift(new Bar(item));
@@ -20,6 +27,19 @@ function reducer(state, action) {
             }, []);
             updateBars(bars);
             wnd.pos = _.nth(bars, -1).x2;
+            var displayBars = updateWindow(bars, wnd);
+            return { bars: bars, displayBars: displayBars, window: wnd };
+        case "FETCH_DATA_NEXT_SUCC":
+            delete state._fetch;
+            var bars = action.data.reduce(function(acc, item) {
+                acc.unshift(new Bar(item));
+                return acc;
+            }, state.bars);
+            updateBars(bars);
+            var datetime = state.displayBars[0].datetime;
+            var bar = getBarByTime(state.bars, datetime);
+            var wnd = _.clone(state.window);
+            wnd.pos = bar.x2;
             var displayBars = updateWindow(bars, wnd);
             return { bars: bars, displayBars: displayBars, window: wnd };
         case "MOVE_PREV":
@@ -37,6 +57,17 @@ function reducer(state, action) {
     }
 }
 
+function getBarByTime(bars, datetime) {
+    if (bars[0].datetime < datetime) {
+        return bars[0];
+    }
+    for (var i = 0; i < bars.length - 1; i++) {
+        if (bars[i + 1].datetime < datetime && datetime <= bars[i].datetime) {
+            return bars[i];
+        }
+    }
+    return _.nth(bars, -1);
+}
 
 function updateBars(bars) {
     if (!bars.length) {
@@ -86,17 +117,36 @@ function MA(bars, n, name) {
 function Action() {
     this.fetchData = function() {
         return function(dispatch, getState) {
-            fetch("/static/data/2001.json").then(function(res) {
-                return res.json();
-            }).then(function(json) {
-                dispatch({ type: "FETCH_DATA_SUCC", data: json });
+            dispatch({ type: "FETCH_DATA" });
+            $.ajax({
+                url: "/bar?from=2001-01-01 00:00:00",
+                type: "GET",
+                success: function(data) {
+                    dispatch({ type: "FETCH_DATA_SUCC", data: data });
+                }
             })
         };
     }
     this.moveNext = function() {
         return function(dispatch, getState) {
+            var state = getState();
+            // console.log(state.data.window.pos);
             dispatch({ type: "MOVE_NEXT" });
             dispatch(ordersAction.checkOrders());
+            if (state.data.window.pos >= 20 || state.data._fetch) {
+                return;
+            }
+            dispatch({ type: "FETCH_DATA" });
+            var datetime = state.data.bars[0].datetime;
+            datetime = new Date(datetime.valueOf() + 1000);
+            var from = moment(datetime).format("YYYY-MM-DD HH:mm:ss");
+            $.ajax({
+                url: "/bar?from=" + from,
+                type: "GET",
+                success: function(data) {
+                    dispatch({ type: "FETCH_DATA_NEXT_SUCC", data: data });
+                }
+            })
         }
     }
 }
