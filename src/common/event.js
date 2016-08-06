@@ -73,27 +73,18 @@ EventEmitterEx.prototype.emitParent = function(type, action) {
     }
 }
 
-EventEmitterEx.prototype.emit = function(type, action) {
+EventEmitterEx.prototype.emitThrough = function(type, action) {
     if (this.listenerCount(type) > 0) {
         //1. has handler
         return this.emitSelf.apply(this, arguments);
     } else if (this.parent) {
         //2. has parent
-        return this.emit.apply(this.parent, arguments);
+        return this.emitThrough.apply(this.parent, arguments);
     } else {
         return this.emitSelf.apply(this, arguments);
     }
-
-    // if (this.parent && this.parent.listenerCount(type) > 0) {
-    //     //1.has parent and parent has handler
-    //     return this.parent.emitParent.apply(this, arguments);
-    // } else if (this.parent && this.parent.listenerCount(type) == 0) {
-    //     //2.has parent but parent has not handler
-    //     return this.parent.emit.apply(this.parent, arguments);
-    // } else {
-    //     //3.has not parent
-    //     return this.emitSelf.apply(this, arguments);
-    // }
 }
+
+EventEmitterEx.prototype.emit = EventEmitterEx.prototype.emitSelf;
 
 module.exports = new EventEmitterEx();

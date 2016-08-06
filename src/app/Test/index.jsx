@@ -17,11 +17,15 @@ function TicketClass() {
         var kv = _.zipObject([e.target.name], [e.target.value]);
         this.props.ev.event(_.assign({}, this.props.ticket, kv));
     }
+    this.onClickDelete = function() {
+        this.props.ev.emit("DELETE");
+    }
     this.render = function() {
         return jade(`
             div
                 input(type="text" name="name" value={this.props.name} onChange={this.onChange})
                 input(type="text" name="value" value={this.props.value} onChange={this.onChange})
+                a(href="javescript:void(0);" onClick={this.onClickDelete}) x
             `);
     }
 }
@@ -38,10 +42,22 @@ function TicketsClass() {
         })
         this.props.ev.event(tickets);
     }
+    this.onClickAddTicket = function() {
+        var tickets = this.props.tickets.concat([kit.keyObject()]);
+        this.props.ev.event(tickets);
+    }
+    this.onDeleteTicket = function(idx) {
+        var tickets = this.props.tickets.filter(function(t, i) {
+            return i != idx;
+        })
+        this.props.ev.event(tickets);
+    }
     this.render = function() {
         return jade("div", function() {
             return this.props.tickets.map(function(ticket, i) {
-                var ev = this.props.ev.fork(this.onChangeTicket.bind(null, i));
+                var ev = this.props.ev
+                    .fork(this.onChangeTicket.bind(null, i))
+                    .on("DELETE", this.onDeleteTicket.bind(null, i));
                 return jade(`Ticket(key={ticket._key} ticket={ticket} ev={ev})`);
             }.bind(this)).concat([jade("button(key='add' onClick={this.onClickAddTicket}) add")]);
         }.bind(this))
