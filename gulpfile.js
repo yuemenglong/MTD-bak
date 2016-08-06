@@ -38,10 +38,11 @@ var requireMap = {
     "bluebird": "http://cdn.bootcss.com/bluebird/3.3.5/bluebird.min.js",
     "fetch": "http://cdn.bootcss.com/fetch/1.0.0/fetch.min.js",
     "moment": "http://cdn.bootcss.com/moment.js/2.13.0/moment.min.js",
-    "events": "http://cdn.bootcss.com/EventEmitter/5.0.0/EventEmitter.min.js",
+    //"events": "http://cdn.bootcss.com/EventEmitter/5.0.0/EventEmitter.min.js",
     "chosen": "http://cdn.bootcss.com/chosen/1.5.1/chosen.jquery.min.js",
     "redux-thunk": "",
     "react-addons-update": "",
+    "events": "",
 }
 
 var assets = [".*\\.less"];

@@ -1,152 +1,74 @@
 var _ = require("lodash");
 var React = require("react");
-var Todo = require("../../component/Todo");
-var EventEmitter = require("events").EventEmitter;
-var Redux = require("redux");
-var ReactRedux = require("react-redux");
-var connect = ReactRedux.connect;
-var moment = require("moment");
-
-var reducer = require("./reducer");
-var todoAction = require("./reducer/todo").action;
-var Table = require("../../component/Table");
-var Modal = require("../../component/Modal");
+var ev = require("../../common/event");
+var kit = require("../../common/kit");
 
 require("./style.less");
 
-var headers = ["company", "lineNo", "from", "to", "startTime", "endTime"];
+ev.globalHook(function() {
+    console.log(_.assign({}, arguments));
+})
 
-function renderLegHeader() {
-    return jade("tr", function() {
-        return headers.map(function(item) {
-            return jade("td {item}");
-        })
-    })
-}
-
-function renderLeg(leg) {
-    return jade("tr", function() {
-        return headers.map(function(item) {
-            return jade("td {leg[item]}");
-        })
-    })
-}
-
-function renderLegs(legs) {
-    return legs.map(renderLeg);
-}
-
-function renderLegTable(legs) {
-    return jade(`
-        table(className="table ticket")
-            thead #{}
-            tbody #{}
-        `,
-        renderLegHeader(),
-        renderLegs(legs)
-    );
-}
-
-function renderPnr(pnr) {
-    return jade(`
-        div
-            span 定位编码
-            br
-            span pnr
-        `);
-}
-
-function TestClass() {
+function TicketClass() {
     this.getDefaultProps = function() {
-        return {
-            pnr: "12345",
-            legs: [{
-                lineNo: 981,
-                company: "CA",
-                from: "PEK",
-                to: "JFK",
-                startTime: moment().format("YYYY-MM-DD"),
-                endTime: moment().format("YYYY-MM-DD"),
-            }, {
-                lineNo: 982,
-                company: "UA",
-                from: "JFK",
-                to: "SFO",
-                startTime: moment().format("YYYY-MM-DD"),
-                endTime: moment().format("YYYY-MM-DD"),
-            }]
-        }
+        return { ev: ev };
     }
-    this.renderPnr = function(pnr) {
-        return jade(`
-            span
-                input(type="checkbox")
-                |{pnr}
-            `);
-    }
-    this.renderPrice = function(current, total) {
-        return jade(`
-            span
-                input(type="text" value={current})
-                |/{total}
-            `);
-    }
-    this.renderTable = function() {
-        var objectHeader = ["lineNo", "company", "from", "to", "startTime", "endTime"]
-        var header = _.flatten(["定位编码", objectHeader, "支付价格"]);
-        var pnr = this.renderPnr(this.props.pnr);
-        var price = this.renderPrice(50, 100);
-        var body = this.props.legs.map(function(leg) {
-            var objectField = _.values(leg);
-            var ret = [pnr, objectField, price];
-            return _.flatten(ret);
-        }.bind(this));
-        return jade(`
-            Table(className="table cch-table cch-book" body={body} rowspan={[0, 7]})
-            `);
-    }
-    this.renderCustom = function() {
-        return jade("Table(className='table cch-table' header={['Y/X/C', '1203123123']})");
-    }
-    this.renderPanel = function() {
-        return jade(`
-            div(className="panel cch-panel panel-primary")
-                //- div(className="panel-heading") heading 
-                div(className="panel-body") {this.renderCustom()}
-                |{this.renderTable()}
-                //- div(className="panel-body")
-                div(className="panel-heading") heading 
-                |{this.renderTable()}
-            `);
-    }
-    this.renderTableInnerTable = function() {
-        var innerTable = jade(`
-               div
-                    span(className="cch-justify") 1
-                    span(className="cch-justify") 2
-                    span(className="cch-justify") 3
-            `);
-        var body = [
-            [innerTable, 4, 5]
-        ];
-        return jade(`
-            Table(className="table cch-table", body={body})
-            `);
-    }
-    this.renderFilter = function() {
-        var body = [
-            ["firstName", jade("input(type='text')"), "lastName", jade("input(type='text')")],
-        ]
-        return jade("Table(className='table cch-table cch-filter' body={body})");
+    this.onChange = function(e) {
+        var kv = _.zipObject([e.target.name], [e.target.value]);
+        this.props.ev.event(_.assign({}, this.props.ticket, kv));
     }
     this.render = function() {
         return jade(`
-            Modal 
-                |{this.renderPanel()}
-                |{this.renderFilter()}
-            `)
+            div
+                input(type="text" name="name" value={this.props.name} onChange={this.onChange})
+                input(type="text" name="value" value={this.props.value} onChange={this.onChange})
+            `);
     }
 }
 
-module.exports = connect()(React.createClass(new TestClass()));
-module.exports.reducer = reducer;
+var Ticket = React.createClass(new TicketClass());
+
+function TicketsClass() {
+    this.getDefaultProps = function() {
+        return { ev: ev, tickets: [] };
+    }
+    this.onChangeTicket = function(idx, ticket) {
+        var tickets = this.props.tickets.map(function(t, i) {
+            return idx == i ? ticket : t;
+        })
+        this.props.ev.event(tickets);
+    }
+    this.render = function() {
+        return jade("div", function() {
+            return this.props.tickets.map(function(ticket, i) {
+                var ev = this.props.ev.fork(this.onChangeTicket.bind(null, i));
+                return jade(`Ticket(key={ticket._key} ticket={ticket} ev={ev})`);
+            }.bind(this)).concat([jade("button(key='add' onClick={this.onClickAddTicket}) add")]);
+        }.bind(this))
+    }
+}
+
+var Tickets = React.createClass(new TicketsClass());
+
+function TestClass() {
+    this.getDefaultProps = function() {
+        return { tickets: [{}, {}], ev: ev };
+    }
+    this.getInitialState = function() {
+        var state = _.cloneDeep({ tickets: this.props.tickets });
+        kit.keyObject(state);
+        return state;
+    }
+    this.onChange = function(tickets) {
+        console.log(JSON.stringify(tickets));
+        this.setState({ tickets: tickets });
+    }
+    this.render = function() {
+        var ev = this.props.ev.fork(this.onChange);
+        return jade(`
+            Tickets(ev={ev} tickets={this.state.tickets})
+            `);
+    }
+}
+
+module.exports = React.createClass(new TestClass());
