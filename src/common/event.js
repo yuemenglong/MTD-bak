@@ -25,6 +25,8 @@ function EventEmitterEx(parent) {
     });
 }(EventEmitterEx, EventEmitter);
 
+EventEmitterEx.prototype.EVENT_TYPE = EVENT_TYPE;
+
 EventEmitterEx.prototype.fork = function(cb) {
     var ret = new EventEmitterEx(this);
     if (typeof cb == "function") ret.event(cb);
