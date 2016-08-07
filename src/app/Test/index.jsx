@@ -14,17 +14,19 @@ function TicketClass() {
         return { ev: ev };
     }
     this.onChange = function(e) {
-        var kv = _.zipObject([e.target.name], [e.target.value]);
-        this.props.ev.event(_.assign({}, this.props.ticket, kv));
+        var ticket = _.cloneDeep(this.props.ticket);
+        ticket[e.target.name] = e.target.value;
+        this.props.ev.event({ ticket: ticket });
     }
     this.onClickDelete = function() {
         this.props.ev.emit("DELETE");
     }
     this.render = function() {
+        var ticket = this.props.ticket;
         return jade(`
             div
-                input(type="text" name="name" value={this.props.name} onChange={this.onChange})
-                input(type="text" name="value" value={this.props.value} onChange={this.onChange})
+                input(type="text" name="name" value={ticket.name} onChange={this.onChange})
+                input(type="text" name="value" value={ticket.value} onChange={this.onChange})
                 a(href="javescript:void(0);" onClick={this.onClickDelete}) x
             `);
     }
@@ -36,21 +38,22 @@ function TicketsClass() {
     this.getDefaultProps = function() {
         return { ev: ev, tickets: [] };
     }
-    this.onChangeTicket = function(idx, ticket) {
+    this.onChangeTicket = function(idx, props) {
+        var ticket = props.ticket;
         var tickets = this.props.tickets.map(function(t, i) {
             return idx == i ? ticket : t;
         })
-        this.props.ev.event(tickets);
+        this.props.ev.event({ tickets: tickets });
     }
     this.onClickAddTicket = function() {
         var tickets = this.props.tickets.concat([kit.keyObject()]);
-        this.props.ev.event(tickets);
+        this.props.ev.event({ tickets: tickets });
     }
     this.onDeleteTicket = function(idx) {
         var tickets = this.props.tickets.filter(function(t, i) {
             return i != idx;
         })
-        this.props.ev.event(tickets);
+        this.props.ev.event({ tickets: tickets });
     }
     this.render = function() {
         return jade("div", function() {
@@ -67,22 +70,25 @@ function TicketsClass() {
 var Tickets = React.createClass(new TicketsClass());
 
 function TestClass() {
-    this.getDefaultProps = function() {
-        return { tickets: [{}, {}], ev: ev };
+    // this.getDefaultProps = function() {
+    //     // return { tickets: [{}, {}], ev: ev };
+    // }
+    // this.getInitialState = function() {
+    //     // var state = _.cloneDeep({ tickets: this.props.tickets });
+    //     // kit.keyObject(state);
+    //     // return state;
+    // }
+    this.componentDidMount = function() {
+        ev.event(this.onEvent);
     }
-    this.getInitialState = function() {
-        var state = _.cloneDeep({ tickets: this.props.tickets });
-        kit.keyObject(state);
-        return state;
-    }
-    this.onChange = function(tickets) {
-        console.log(JSON.stringify(tickets));
-        this.setState({ tickets: tickets });
+    this.onEvent = function(state) {
+        console.log(JSON.stringify(state));
+        this.setState(state);
     }
     this.render = function() {
-        var ev = this.props.ev.fork(this.onChange);
+        // var ev = this.props.ev.fork(this.onChange);
         return jade(`
-            Tickets(ev={ev} tickets={this.state.tickets})
+            Tickets({...this.state})
             `);
     }
 }
