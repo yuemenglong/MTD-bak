@@ -13,6 +13,9 @@ function TicketClass() {
     this.getDefaultProps = function() {
         return { ev: ev };
     }
+    this.getInitialState = function() {
+        return { ext: false };
+    }
     this.onChange = function(e) {
         var kv = _.zipObject([e.target.name], [e.target.value]);
         this.props.ev.event(_.assign({}, this.props.ticket, kv));
@@ -20,12 +23,23 @@ function TicketClass() {
     this.onClickDelete = function() {
         this.props.ev.emit("DELETE");
     }
+    this.onClickExt = function() {
+        var ext = !this.state.ext;
+        this.setState({ ext: ext });
+    }
+    this.renderExt = function() {
+        if (this.state.ext) {
+            return jade(`input(type="text" name="ext" value={this.props.ext} onChange={this.onChange})`);
+        }
+    }
     this.render = function() {
         return jade(`
             div
                 input(type="text" name="name" value={this.props.name} onChange={this.onChange})
                 input(type="text" name="value" value={this.props.value} onChange={this.onChange})
                 a(href="javescript:void(0);" onClick={this.onClickDelete}) x
+                a(href="javescript:void(0);" onClick={this.onClickExt}) ext
+                |{this.renderExt()}
             `);
     }
 }
@@ -76,7 +90,6 @@ function TestClass() {
         return state;
     }
     this.onChange = function(tickets) {
-        console.log(JSON.stringify(tickets));
         this.setState({ tickets: tickets });
     }
     this.render = function() {
@@ -85,6 +98,11 @@ function TestClass() {
             Tickets(ev={ev} tickets={this.state.tickets})
             `);
     }
+}
+
+function reducer(state, action) {
+    state = state || {};
+    return state;
 }
 
 module.exports = React.createClass(new TestClass());
